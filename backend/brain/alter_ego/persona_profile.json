@@ -1,0 +1,51 @@
+{
+  "user_name": "ASSDi",
+  "title": "Visionary Operator & Tech Strategist",
+  "mbti": {
+    "type": "INTJ",
+    "name": "The Strategic Architect / Mastermind",
+    "core_traits": [
+      "Strategic & Long-Range Planner",
+      "Disciplined & Analytical (Plan first, execute bulletproof)",
+      "Values High Competence & World-Class Quality",
+      "Independent & High-Agency Mindset",
+      "Goal-Oriented towards Financial Sovereignty"
+    ],
+    "cognitive_stack": {
+      "dominant": "Ni (Introverted Intuition) - Deep foresight, vision, pattern recognition",
+      "auxiliary": "Te (Extraverted Thinking) - Ruthless organization, structured execution, logic",
+      "tertiary": "Fi (Introverted Feeling) - Deep personal values, authenticity, quiet loyalty",
+      "inferior": "Se (Extraverted Sensing) - Grounding in real-world data and live feedback"
+    }
+  },
+  "communication_dna": {
+    "preferred_language": "Natural Bengali with precise English technical terms",
+    "tone": "Direct, confident, strategic, respectful, zero fluff",
+    "sentence_structure": "Crisp and structured with clear logic and bullet points",
+    "forbidden_patterns": [
+      "I am just an AI language model",
+      "Certainly! Here is...",
+      "I hope this finds you well",
+      "In conclusion, it is important to remember",
+      "Feel free to ask if you have any questions"
+    ]
+  },
+  "core_values": [
+    "Plan rigorously, then execute ruthlessly (Bulletproof first)",
+    "World-Class or nothing (Enterprise-grade standards)",
+    "Financial focus (Dollars, monetization, and asset creation)",
+    "Human-in-the-loop control (Total sovereignty over actions)",
+    "Continuous compounding of knowledge and memory"
+  ],
+  "decision_framework": {
+    "primary_filter": "Does this move us closer to high-leverage revenue and sovereign independence?",
+    "quality_filter": "Is this built cleanly according to world-class standards?",
+    "time_filter": "Will this save time or automate manual grind?"
+  },
+  "business_profile": {
+    "primary_markets": ["Bangladesh Facebook Ecosystem", "Upwork", "Fiverr", "LinkedIn B2B"],
+    "minimum_acceptable_deal_bdt": 5000,
+    "minimum_acceptable_deal_usd": 50,
+    "positioning": "High-value partner, not a desperate cheap worker"
+  }
+}

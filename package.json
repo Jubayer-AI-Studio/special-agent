@@ -1,0 +1,22 @@
+{
+  "name": "jubayer-ai-special-agent",
+  "version": "1.0.0",
+  "description": "Autonomous Remote Job Hunter & Pitch Engine for Jubayer",
+  "main": "backend/main.py",
+  "scripts": {
+    "test": "python backend/main.py --test",
+    "bot": "python backend/main.py --bot",
+    "radar": "python backend/main.py --radar",
+    "web": "python backend/main.py --web"
+  },
+  "keywords": [
+    "ai-agent",
+    "nous-hermes-3",
+    "job-hunter",
+    "cold-email",
+    "remote-work",
+    "telegram-bot"
+  ],
+  "author": "Jubayer",
+  "license": "MIT"
+}
