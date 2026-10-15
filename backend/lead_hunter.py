@@ -20,6 +20,7 @@ from typing import List, Dict, Any, Optional
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 SEEN_FILE = os.path.join(DATA_DIR, "seen_ids.json")
 LEADS_FILE = os.path.join(DATA_DIR, "live_leads.json")
+LEADS_JS_FILE = os.path.join(DATA_DIR, "live_leads.js")
 
 # Core keywords representing Jubayer Ahmad's technical stack + micro-tasks + regional gigs
 CORE_KEYWORDS = [
@@ -77,6 +78,8 @@ def save_live_leads(new_leads: List[Dict[str, Any]], max_count: int = 30):
     trimmed = combined[:max_count]
     with open(LEADS_FILE, "w", encoding="utf-8") as f:
         json.dump(trimmed, f, indent=2, ensure_ascii=False)
+    with open(LEADS_JS_FILE, "w", encoding="utf-8") as f:
+        f.write(f"window.LIVE_LEADS_DATA = {json.dumps(trimmed, indent=2, ensure_ascii=False)};\n")
     return trimmed
 
 def extract_email(text: str) -> str:

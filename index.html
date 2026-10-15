@@ -10,6 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Instant local data loading for file:// protocol without server -->
+  <script src="./data/live_leads.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -160,16 +162,28 @@
     let currentFilter = 'all';
 
     async function loadData() {
-      try {
-        const res = await fetch('./data/live_leads.json?t=' + Date.now());
-        if (!res.ok) throw new Error("File not ready");
-        allLeads = await res.json();
+      // 1. Instant offline / file:// protocol load via window.LIVE_LEADS_DATA
+      if (window.LIVE_LEADS_DATA && Array.isArray(window.LIVE_LEADS_DATA) && window.LIVE_LEADS_DATA.length > 0) {
+        allLeads = window.LIVE_LEADS_DATA;
         updateStats();
         renderLeads();
-      } catch (err) {
-        console.warn("Loading live_leads.json failed, retrying...", err);
-        // Fallback retry after 2 seconds
-        setTimeout(loadData, 2000);
+      }
+
+      // 2. Dynamic live sync if running on web server or GitHub Pages
+      if (window.location.protocol.startsWith('http')) {
+        try {
+          const res = await fetch('./data/live_leads.json?t=' + Date.now());
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+              allLeads = data;
+              updateStats();
+              renderLeads();
+            }
+          }
+        } catch (err) {
+          console.log("Fetch notice:", err);
+        }
       }
     }
 
