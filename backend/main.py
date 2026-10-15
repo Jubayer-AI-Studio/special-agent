@@ -88,25 +88,28 @@ async def run_radar_loop(interval_seconds: int = 300):
 
 def main():
     parser = argparse.ArgumentParser(description="Jubayer AI Special Agent Core")
+    parser.add_argument("--cron", action="store_true", help="Execute one-shot autonomous cron sweep & notify")
+    parser.add_argument("--bot", action="store_true", help="Start interactive 24/7 Telegram Gatekeeper bot polling")
     parser.add_argument("--test", action="store_true", help="Run self-diagnostic verification")
-    parser.add_argument("--bot", action="store_true", help="Start Telegram Gatekeeper bot polling")
     parser.add_argument("--radar", action="store_true", help="Start continuous 24/7 Radar")
     parser.add_argument("--web", action="store_true", help="Launch UI/UX Pro Max Web Dashboard")
     args = parser.parse_args()
 
-    if args.test or len(sys.argv) == 1:
-        run_diagnostics()
+    if args.cron:
+        from backend.telegram_gatekeeper import run_cron_cycle
+        run_cron_cycle()
     elif args.bot:
-        token = os.getenv("TELEGRAM_BOT_TOKEN")
-        gatekeeper = TelegramGatekeeper(token)
-        print("🤖 [Special Agent] @Jubayer_agent_bot listening for mobile commands...")
-        gatekeeper.app.run_polling()
+        from backend.telegram_gatekeeper import run_interactive_bot
+        run_interactive_bot()
     elif args.radar:
         asyncio.run(run_radar_loop())
     elif args.web:
         import uvicorn
         print("🌐 [Special Agent] Launching Web Dashboard at http://127.0.0.1:8000 ...")
         uvicorn.run("backend.web_server:app", host="127.0.0.1", port=8000, reload=False)
+    elif args.test or len(sys.argv) == 1:
+        run_diagnostics()
 
 if __name__ == "__main__":
     main()
+
