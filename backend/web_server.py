@@ -177,13 +177,14 @@ async def telegram_webhook(request: Request):
             reply = (
                 f"👑 **সালাম {first_name} ভাই!**\n"
                 f"━━━━━━━━━━━━━━━━━━━\n"
-                f"আমি আপনার পার্সোনাল **AI Job Hunter & Career Agent**।\n"
+                f"আমি আপনার পার্সোনাল **AI Job Hunter & Career Alter-Ego**।\n"
                 f"📱 মোবাইল ক্লাউড গেটওয়ে সফলভাবে কানেক্টেড!\n\n"
                 f"🚀 **উপলব্ধ কমান্ডসমূহ:**\n"
+                f"• `/hackathons` - লাইভ গ্লোবাল হ্যাকাথন ও টিম প্রপোজাল হান্টার\n"
                 f"• `/scan` - লাইভ নতুন রিমোট জব সার্চ ও পিচ তৈরি\n"
                 f"• `/status` - ড্যাশবোর্ড রিপোর্ট ও পরিসংখ্যান\n"
-                f"• যেকোনো মেসেজ লিখলে আমি সরাসরি রেসপন্স দেব।\n\n"
-                f"🌐 আপনার লাইভ মিশন কন্ট্রোল ড্যাশবোর্ড:\nhttps://special-agent-one.vercel.app"
+                f"• যেকোনো প্রশ্ন বা চ্যাট করলে আমি মুক্তভাবে হার্মেস ৩ ব্রেন দিয়ে রেসপন্স দেব।\n\n"
+                f"🌐 আপনার লাইভ মিশন কন্ট্রোল ড্যাশবোর্ড:\nhttps://jubayer-ai-studio.github.io/special-agent/"
             )
             await send_tg(token, chat_id, reply)
         elif text.startswith("/status"):
@@ -230,7 +231,36 @@ async def telegram_webhook(request: Request):
                 }
                 await send_tg(token, chat_id, card_text, reply_markup=markup)
             
-            await send_tg(token, chat_id, f"✅ স্ক্যান শেষ! মোট {len(jobs)}টি নতুন জব পাওয়া গেছে। ড্যাশবোর্ডে দেখুন: https://special-agent-one.vercel.app")
+            await send_tg(token, chat_id, f"✅ স্ক্যান শেষ! মোট {len(jobs)}টি নতুন জব পাওয়া গেছে। ড্যাশবোর্ডে দেখুন: https://jubayer-ai-studio.github.io/special-agent/")
+        elif text.startswith("/hackathons"):
+            await send_tg(token, chat_id, "🏆 Devpost ও গ্লোবাল হ্যাকাথন পোর্টালগুলোতে স্ক্যান শুরু হয়েছে... অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করুন।")
+            hacks = await job_radar.fetch_devpost_hackathons()
+            if not hacks:
+                await send_tg(token, chat_id, "ℹ️ বর্তমানে কোনো নতুন আন-রেজিস্টার্ড হ্যাকাথন পাওয়া যায়নি। পূর্বের হ্যাকাথনগুলো ড্যাশবোর্ডে সংরক্ষিত রয়েছে।")
+            else:
+                for h in hacks[:2]:
+                    d = hermes_brain.draft_application(h)
+                    app_id = d.get("application_id", 0)
+                    card_text = (
+                        f"🏆 **নতুন গ্লোবাল হ্যাকাথন পাওয়া গেছে!**\n"
+                        f"━━━━━━━━━━━━━━━━━━━\n"
+                        f"📌 **নাম:** {d.get('title')}\n"
+                        f"💰 **পুরস্কার পুল:** {d.get('salary_range')}\n"
+                        f"🌍 **মোড:** {d.get('location')}\n\n"
+                        f"📝 **হার্মিস ৩-এর প্রপোজাল ড্রাফট:**\n"
+                        f"{d.get('email_body')[:350]}...\n\n"
+                        f"রেজিস্ট্রেশন লিংক ও বিস্তারিত নিচে দেখুন:"
+                    )
+                    markup = {
+                        "inline_keyboard": [
+                            [
+                                {"text": "🔗 সরাসরি রেজিস্ট্রেশন পেজ", "url": d.get("apply_url")},
+                                {"text": "✅ প্রপোজাল সেভ", "callback_data": f"save_hack_{app_id}"}
+                            ]
+                        ]
+                    }
+                    await send_tg(token, chat_id, card_text, reply_markup=markup)
+                await send_tg(token, chat_id, f"🎉 মোট {len(hacks)}টি ওপেন হ্যাকাথন পাওয়া গেছে! ড্যাশবোর্ডে দেখুন: https://jubayer-ai-studio.github.io/special-agent/")
         else:
             # 1. Fetch recent conversation memory for contextual continuity
             history = get_recent_chat_history(chat_id, limit=6)

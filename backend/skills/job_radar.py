@@ -105,14 +105,63 @@ class JobRadar:
 
         return jobs_found
 
+    async def fetch_devpost_hackathons(self) -> List[Dict[str, Any]]:
+        """Fetches live global software & AI hackathons from Devpost official API."""
+        hackathons_found = []
+        url = "https://devpost.com/api/hackathons"
+        try:
+            async with aiohttp.ClientSession(headers=self.headers) as session:
+                async with session.get(url, timeout=15) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        for h in data.get("hackathons", []):
+                            apply_url = h.get("url", "")
+                            if not apply_url or job_exists(apply_url):
+                                continue
+
+                            title = h.get("title", "Global AI Hackathon")
+                            themes = [t.get("name", "") for t in h.get("themes", [])]
+                            prize = re.sub(r'<[^<]+?>', '', h.get("prize_amount", "Prizes Available")).strip()
+                            dates = h.get("submission_period_dates", "Open")
+
+                            desc = (
+                                f"🏆 Global Hackathon Competition on Devpost.\n"
+                                f"Themes: {', '.join(themes)}.\n"
+                                f"Timeline: {dates}.\n"
+                                f"Prize Pool: {prize}.\n"
+                                f"Registration & Details: {apply_url}"
+                            )
+
+                            hack_dict = {
+                                "source": "Devpost Hackathon",
+                                "company_name": "Devpost Sponsor",
+                                "title": f"🏆 {title}",
+                                "description": desc,
+                                "recruiter_email": "",
+                                "apply_url": apply_url,
+                                "salary_range": f"Prize: {prize}",
+                                "location": "Online / Global Hackathon",
+                                "detected_language": "en",
+                                "match_score": 95,
+                                "status": "qualified"
+                            }
+                            job_id = insert_job(hack_dict)
+                            hack_dict["id"] = job_id
+                            hackathons_found.append(hack_dict)
+        except Exception as e:
+            print(f"[JobRadar] Notice on Devpost Hackathons: {e}")
+
+        return hackathons_found
+
     async def scan_all_sources(self) -> List[Dict[str, Any]]:
-        """Scans all supported sources concurrently."""
+        """Scans all supported sources concurrently (RemoteOK, WeWorkRemotely, Devpost Hackathons)."""
         remoteok_task = self.fetch_remoteok_jobs()
+        hackathon_task = self.fetch_devpost_hackathons()
         # Run WeWorkRemotely sync in thread pool
         loop = asyncio.get_event_loop()
         wwr_task = loop.run_in_executor(None, self.fetch_weworkremotely_jobs)
-        
-        results = await asyncio.gather(remoteok_task, wwr_task, return_exceptions=True)
+
+        results = await asyncio.gather(remoteok_task, wwr_task, hackathon_task, return_exceptions=True)
         all_jobs = []
         for r in results:
             if isinstance(r, list):
@@ -120,3 +169,4 @@ class JobRadar:
         return all_jobs
 
 job_radar = JobRadar()
+

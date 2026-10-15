@@ -66,13 +66,31 @@ class HermesBrain:
         relevant_assets = self.select_relevant_assets(title, desc)
         asset_lines = "\n".join([f"• {a['title']}: {a['url']}" for a in relevant_assets])
 
-        subject = f"Application for {title} - {name} ({role_title})"
+        is_hackathon = "hackathon" in job.get("source", "").lower() or "hackathon" in title.lower()
+
+        if is_hackathon:
+            subject = f"🏆 Hackathon Project Proposal: {title} - {name}"
+        else:
+            subject = f"Application for {title} - {name} ({role_title})"
 
         if not self.client:
+            if is_hackathon:
+                body = (
+                    f"Hi {company} & Hackathon Review Committee,\n\n"
+                    f"I am submitting our project concept and registration for {title}.\n\n"
+                    f"Developer & AI Engineer: {name} ({role_title})\n"
+                    f"Core Stack: React, Next.js, Python FastAPI, Autonomous AI Agents\n\n"
+                    f"Relevant Technical Proof & Live Projects:\n"
+                    f"{asset_lines}\n\n"
+                    f"Project Execution Plan:\n"
+                    f"Building an ultra-responsive, scalable solution targeting the competition's core challenge with rapid prototyping and production-grade stability.\n\n"
+                    f"Best regards,\n"
+                    f"{name}\n"
+                    f"Team Lead / Full Stack Developer\n"
+                    f"Email: {email}"
+                )
             # Dynamic template tuned to the exact matching category
-            is_video = any(a.get("category") == "ai_video" for a in relevant_assets)
-            
-            if is_video:
+            elif any(a.get("category") == "ai_video" for a in relevant_assets):
                 body = (
                     f"Hi {company} Hiring Team,\n\n"
                     f"I noticed your opening for the {title} role and wanted to reach out. "
