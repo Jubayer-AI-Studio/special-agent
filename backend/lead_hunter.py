@@ -21,11 +21,13 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 SEEN_FILE = os.path.join(DATA_DIR, "seen_ids.json")
 LEADS_FILE = os.path.join(DATA_DIR, "live_leads.json")
 
-# Core keywords representing Jubayer Ahmad's technical stack
+# Core keywords representing Jubayer Ahmad's technical stack + micro-tasks + regional gigs
 CORE_KEYWORDS = [
     "python", "bot", "telegram", "scraper", "automation", "ai",
     "website", "nextjs", "react", "full-stack", "fullstack",
-    "script", "video", "ffmpeg", "api", "dashboard", "developer", "web"
+    "script", "video", "ffmpeg", "api", "dashboard", "developer", "web",
+    "bug", "fix", "quick", "small task", "micro task", "wordpress",
+    "data entry", "bangladesh", "india", "pakistan", "bdt", "inr"
 ]
 
 HEADERS = {
@@ -345,35 +347,82 @@ def fetch_devpost_hackathons() -> List[Dict[str, Any]]:
         
     return hackathons
 
+# --- 5. FREELANCER.COM MICRO & REGIONAL TASKS ---
+def fetch_freelancer_jobs() -> List[Dict[str, Any]]:
+    jobs = []
+    seen = load_seen_ids()
+    url = "https://www.freelancer.com/rss.xml"
+    try:
+        feed = feedparser.parse(url, request_headers=HEADERS)
+        for entry in feed.entries[:30]:
+            apply_url = entry.link
+            if apply_url in seen:
+                continue
+
+            title = entry.title
+            desc = getattr(entry, "summary", "")
+            full_text = f"{title} {desc}"
+
+            if not any(kw in full_text.lower() for kw in CORE_KEYWORDS):
+                continue
+
+            budget = extract_budget(desc, default="$10 - $60 (Micro Gig)")
+            clean_desc = re.sub(r'<[^<]+?>', '', desc)[:800].strip()
+
+            job = {
+                "id": f"freelancer_{abs(hash(apply_url))}",
+                "source": "Freelancer.com (Micro Gig)",
+                "title": title.strip(),
+                "company": "Freelancer Client (Regional / Global)",
+                "url": apply_url,
+                "description": clean_desc,
+                "contact_email": "",
+                "budget_or_prize": budget,
+                "match_score": calculate_match_score(full_text),
+                "published_at": getattr(entry, "published", datetime.now(timezone.utc).isoformat()),
+                "type": "client_gig"
+            }
+            jobs.append(job)
+    except Exception as e:
+        print(f"[LeadHunter] Notice: Freelancer.com: {e}")
+
+    return jobs
+
 # --- MULTI-SOURCE CONCURRENT SCANNER ---
 def scan_all_real_sources() -> List[Dict[str, Any]]:
     """
-    Executes real scraping across all 4 platforms and returns un-seen qualified leads.
+    Executes real scraping across all platforms (Reddit, Freelancer, RemoteOK, WeWorkRemotely, Devpost)
+    and returns un-seen qualified leads.
     """
     all_found = []
-    
+
     # 1. Reddit r/forhire & r/slavelabour
     print("[LeadHunter] 🔍 Scanning Reddit r/forhire...")
     all_found.extend(fetch_reddit_sub("forhire"))
-    
+
     print("[LeadHunter] 🔍 Scanning Reddit r/slavelabour...")
     all_found.extend(fetch_reddit_sub("slavelabour"))
-    
-    # 2. RemoteOK
+
+    # 2. Freelancer.com (Micro & Regional Tasks)
+    print("[LeadHunter] 🔍 Scanning Freelancer.com Micro Tasks...")
+    all_found.extend(fetch_freelancer_jobs())
+
+    # 3. RemoteOK
     print("[LeadHunter] 🔍 Scanning RemoteOK Public API...")
     all_found.extend(fetch_remoteok_jobs())
-    
-    # 3. WeWorkRemotely
+
+    # 4. WeWorkRemotely
     print("[LeadHunter] 🔍 Scanning WeWorkRemotely RSS...")
     all_found.extend(fetch_weworkremotely_jobs())
-    
-    # 4. Devpost Hackathons
+
+    # 5. Devpost Hackathons
     print("[LeadHunter] 🔍 Scanning Devpost Hackathons API...")
     all_found.extend(fetch_devpost_hackathons())
-    
+
     # Sort with client gigs and hackathons first, then highest match score
     priority_order = {"client_gig": 1, "hackathon": 2, "remote_job": 3}
     all_found.sort(key=lambda x: (priority_order.get(x.get("type", "remote_job"), 4), -x.get("match_score", 0)))
-    
+
     print(f"[LeadHunter] ✅ Total Real Leads Discovered: {len(all_found)}")
     return all_found
+
