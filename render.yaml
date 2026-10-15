@@ -1,26 +1,30 @@
 services:
   - type: web
-    name: jubayer-ai-hunter-web
+    name: jubayer-special-agent
     env: python
+    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python backend/web_server.py
+    startCommand: uvicorn backend.web_server:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
-      - key: SMTP_APP_PASSWORD
+      - key: TELEGRAM_CHAT_ID
         sync: false
       - key: LLM_API_KEY
         sync: false
-
-  - type: worker
-    name: jubayer-ai-hunter-bot
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python backend/main.py --bot
-    envVars:
-      - key: TELEGRAM_BOT_TOKEN
-        sync: false
+      - key: LLM_BASE_URL
+        value: https://openrouter.ai/api/v1
+      - key: LLM_MODEL
+        value: nousresearch/hermes-3-llama-3.1-70b
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        value: jubayerahmadaistudio@gmail.com
       - key: SMTP_APP_PASSWORD
         sync: false
-      - key: LLM_API_KEY
-        sync: false
+      - key: ENABLE_BG_RADAR
+        value: "true"
+      - key: SCAN_INTERVAL_SECONDS
+        value: "300"

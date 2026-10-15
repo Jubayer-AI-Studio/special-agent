@@ -9,8 +9,12 @@ import json
 from typing import Optional, List, Dict, Any
 from contextlib import contextmanager
 
-DB_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
-DB_PATH = os.path.join(DB_DIR, "special_agent.db")
+if os.getenv("VERCEL"):
+    DB_DIR = "/tmp/special_agent_data"
+    DB_PATH = os.path.join(DB_DIR, "special_agent.db")
+else:
+    DB_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
+    DB_PATH = os.path.join(DB_DIR, "special_agent.db")
 SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "schema.sql")
 
 @contextmanager
@@ -30,9 +34,85 @@ def get_db():
 
 def init_db():
     """Initializes tables from schema.sql and seeds default operator profile."""
-    with get_db() as conn:
+    schema_sql = ""
+    if os.path.exists(SCHEMA_PATH):
         with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
-            conn.executescript(f.read())
+            schema_sql = f.read()
+    else:
+        schema_sql = """
+        CREATE TABLE IF NOT EXISTS user_profile (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            title TEXT NOT NULL,
+            email TEXT NOT NULL,
+            portfolio_url TEXT,
+            github_url TEXT,
+            skills_json TEXT NOT NULL,
+            languages_json TEXT NOT NULL,
+            target_roles_json TEXT NOT NULL,
+            working_hours TEXT DEFAULT '07:00-21:00 GMT+6',
+            min_budget_usd REAL DEFAULT 5.0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source TEXT NOT NULL,
+            company_name TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            recruiter_email TEXT,
+            apply_url TEXT UNIQUE NOT NULL,
+            salary_range TEXT DEFAULT 'Negotiable',
+            location TEXT DEFAULT 'Worldwide Remote',
+            detected_language TEXT DEFAULT 'en',
+            match_score INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'new',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id INTEGER NOT NULL,
+            subject TEXT NOT NULL,
+            email_body TEXT NOT NULL,
+            language TEXT DEFAULT 'en',
+            status TEXT DEFAULT 'pending_review',
+            sent_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
+        );
+        CREATE TABLE IF NOT EXISTS outreach_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            application_id INTEGER,
+            recipient_email TEXT NOT NULL,
+            action TEXT NOT NULL,
+            status TEXT NOT NULL,
+            details TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE SET NULL
+        );
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS portfolio_assets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category TEXT NOT NULL,
+            title TEXT NOT NULL,
+            url TEXT UNIQUE NOT NULL,
+            description TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+        CREATE INDEX IF NOT EXISTS idx_jobs_apply_url ON jobs(apply_url);
+        CREATE INDEX IF NOT EXISTS idx_applications_status ON applications(status);
+        CREATE INDEX IF NOT EXISTS idx_applications_job_id ON applications(job_id);
+        CREATE INDEX IF NOT EXISTS idx_assets_category ON portfolio_assets(category);
+        """
+    with get_db() as conn:
+        conn.executescript(schema_sql)
     seed_jubayer_profile()
     seed_portfolio_assets()
 
@@ -222,13 +302,17 @@ def get_all_applications(status: Optional[str] = None, limit: int = 50) -> List[
             """, (limit,))
         return [dict(r) for r in cursor.fetchall()]
 
-def log_outreach(application_id: Optional[int], recipient: str, action: str, status: str, details: str = ""):
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO outreach_logs (application_id, recipient_email, action, status, details)
-            VALUES (?, ?, ?, ?, ?)
-        """, (application_id, recipient, action, status, details))
+def log_outreach(application_id: Optional[int], recipient: str = "", action: str = "", status: str = "", details: str = "", recipient_email: Optional[str] = None):
+    target_email = recipient_email or recipient or "N/A"
+    try:
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO outreach_logs (application_id, recipient_email, action, status, details)
+                VALUES (?, ?, ?, ?, ?)
+            """, (application_id, target_email, action, status, details))
+    except Exception as e:
+        print(f"[log_outreach Notice]: {e}")
 
 def get_dashboard_analytics() -> Dict[str, Any]:
     with get_db() as conn:
@@ -263,6 +347,43 @@ def get_dashboard_analytics() -> Dict[str, Any]:
             "active_operator": profile.get("name", "Jubayer"),
             "recent_activity": recent_activity
         }
+
+def save_chat_message(chat_id: int, role: str, content: str):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS telegram_chat_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chat_id INTEGER,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cursor.execute("""
+            INSERT INTO telegram_chat_history (chat_id, role, content)
+            VALUES (?, ?, ?)
+        """, (chat_id, role, content))
+
+def get_recent_chat_history(chat_id: int, limit: int = 6) -> List[Dict[str, str]]:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS telegram_chat_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chat_id INTEGER,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cursor.execute("""
+            SELECT role, content FROM telegram_chat_history
+            WHERE chat_id = ?
+            ORDER BY id DESC LIMIT ?
+        """, (chat_id, limit))
+        rows = cursor.fetchall()
+        return [{"role": r["role"], "content": r["content"]} for r in reversed(rows)]
 
 # Initialize on module load
 init_db()

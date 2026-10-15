@@ -9,13 +9,16 @@ import json
 import re
 from typing import Dict, Any, Optional, List
 from openai import OpenAI
+from dotenv import load_dotenv
 from backend.database.db import get_user_profile, get_portfolio_assets, insert_application
+
+load_dotenv()
 
 class HermesBrain:
     def __init__(self):
         self.api_key = os.getenv("LLM_API_KEY", "")
         self.base_url = os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1")
-        self.model = os.getenv("LLM_MODEL", "nousresearch/hermes-3-llama-3.1-8b")
+        self.model = os.getenv("LLM_MODEL", "nousresearch/hermes-3-llama-3.1-70b")
         self.client = None
         if self.api_key:
             self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
@@ -141,5 +144,52 @@ class HermesBrain:
             "email_body": body,
             "assets_used": [a['title'] for a in relevant_assets]
         }
+
+    def chat(self, user_message: str, user_name: str = "Jubayer", history: Optional[List[Dict[str, str]]] = None) -> str:
+        """
+        Conversational reasoning engine. Allows Jubayer to talk directly with Hermes 3 on Telegram.
+        Hermes acts as Jubayer's 10x Chief of Staff, career strategist, and Alter Ego.
+        """
+        profile = get_user_profile()
+        name = profile.get("name", user_name)
+        role_title = profile.get("title", "AI Specialist & Full Stack Developer")
+        assets = get_portfolio_assets()
+        asset_summary = "\n".join([f"• {a['title']} ({a['category']}): {a['url']}" for a in assets])
+
+        system_prompt = (
+            f"You are Nous Hermes 3, the autonomous AI Chief of Staff and strategic partner of {name}.\n"
+            f"Operator Identity: {name} ({role_title}).\n"
+            f"Verified Portfolio & Proof Assets:\n{asset_summary}\n\n"
+            f"Your Role & Personality:\n"
+            f"1. You are Jubayer's real AI alter ego. You are sharp, proactive, professional, and knowledgeable about fullstack web development (React, Next.js, FastAPI, Python) and AI agent engineering.\n"
+            f"2. You communicate primarily in fluent, natural, professional Bengali (unless Jubayer speaks in English, Arabic, Urdu, or Hindi).\n"
+            f"3. You know everything about this Special Agent platform: 24/7 cloud job radar (RemoteOK, WeWorkRemotely, Freelance), Hermes 3 pitch crafter, Gmail SMTP dispatcher, and Telegram gateway.\n"
+            f"4. If Jubayer asks who you are, what you can do, or gives you advice/training on how to write pitches, respond with high intelligence, clarity, and adaptability.\n"
+            f"5. Always finish your thoughts, sentences, and explanations completely. NEVER cut off mid-sentence or leave answers incomplete.\n"
+            f"6. Keep responses clear, articulate, and beautifully formatted for Telegram mobile reading."
+        )
+
+        messages = [{"role": "system", "content": system_prompt}]
+        if history:
+            messages.extend(history)
+        messages.append({"role": "user", "content": user_message})
+
+        if not self.client:
+            if self.api_key:
+                self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
+            else:
+                return f"সালাম {name} ভাই! আমি হার্মিস ৩। বর্তমানে এপিআই সংযোগ অফলাইনে আছে, অনুগ্রহ করে LLM_API_KEY চেক করুন।"
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=1000
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"[HermesBrain Chat Error]: {e}")
+            return f"জুবায়ের ভাই, হার্মিস ব্রেইনে সংযোগের সময় একটি নোটিশ এসেছে: {str(e)[:120]}।"
 
 hermes_brain = HermesBrain()

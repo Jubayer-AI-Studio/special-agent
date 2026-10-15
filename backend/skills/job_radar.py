@@ -43,7 +43,7 @@ class JobRadar:
                                 
                                 # Extract potential recruiter email from description if any
                                 email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', description)
-                                recruiter_email = email_match.group(0) if email_match else f"apply@{company.lower().replace(' ', '')}.com"
+                                recruiter_email = email_match.group(0) if email_match else ""
 
                                 job_dict = {
                                     "source": "RemoteOK",
@@ -82,7 +82,7 @@ class JobRadar:
                 company = entry.get("author", "Tech Startup")
                 
                 email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', summary)
-                recruiter_email = email_match.group(0) if email_match else f"careers@{company.lower().replace(' ', '')}.com"
+                recruiter_email = email_match.group(0) if email_match else ""
 
                 job_dict = {
                     "source": "WeWorkRemotely",

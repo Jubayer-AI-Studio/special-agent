@@ -36,3 +36,5 @@ data/*.sqlite3
 # OS Specific
 .DS_Store
 Thumbs.db
+
+.vercel
