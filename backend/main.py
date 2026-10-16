@@ -58,7 +58,7 @@ def run_diagnostics():
     # 4. Telegram Gateway Check
     print("[4/4] Checking Telegram Remote Bridge (@Jubayer_agent_bot)...", end=" ")
     token = os.getenv("TELEGRAM_BOT_TOKEN")
-    if token and "8527137526" in token:
+    if token:
         print("OK! Connected to @Jubayer_agent_bot. Ready for mobile polling.")
     else:
         print("TOKEN STANDBY.")

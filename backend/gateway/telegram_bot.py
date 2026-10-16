@@ -23,7 +23,7 @@ from backend.database.db import (
 )
 from backend.gateway.email_sender import email_dispatcher
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8527137526:AAEEp--H13id9P-avLXS3xkhvJp1BYSwjgc")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 OPERATOR_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 class TelegramGatekeeper:

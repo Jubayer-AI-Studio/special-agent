@@ -161,7 +161,7 @@ async def edit_tg(token: str, chat_id: int, message_id: int, text: str):
 
 @app.post("/api/telegram-webhook")
 async def telegram_webhook(request: Request):
-    token = os.getenv("TELEGRAM_BOT_TOKEN", "8527137526:AAEEp--H13id9P-avLXS3xkhvJp1BYSwjgc")
+    token = os.getenv("TELEGRAM_BOT_TOKEN", "")
     try:
         data = await request.json()
     except Exception:
