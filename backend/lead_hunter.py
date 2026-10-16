@@ -395,40 +395,90 @@ def fetch_freelancer_jobs() -> List[Dict[str, Any]]:
 
     return jobs
 
+# --- 6. BANGLADESH LOCAL TECH JOBS & GIGS (Bdjobs & Bikroy) ---
+def fetch_bangladesh_tech_jobs() -> List[Dict[str, Any]]:
+    jobs = []
+    seen = load_seen_ids()
+    rss_url = "https://news.google.com/rss/search?q=(site:bdjobs.com+OR+site:bikroy.com)+(developer+OR+web+OR+wordpress+OR+intern+OR+frontend+OR+python)&hl=en-BD&gl=BD&ceid=BD:en"
+    try:
+        feed = feedparser.parse(rss_url, request_headers=HEADERS)
+        for entry in feed.entries[:30]:
+            apply_url = entry.link
+            if apply_url in seen:
+                continue
+
+            raw_title = entry.title
+            if any(x in raw_title.lower() for x in ["search jobs", "largest job", "6566"]):
+                continue
+
+            company = "Bangladeshi Tech Client"
+            if " - " in raw_title:
+                parts = raw_title.split(" - ")
+                clean_title = parts[0].strip()
+                company = parts[1].strip() if len(parts) > 1 else company
+            else:
+                clean_title = raw_title.strip()
+
+            desc = getattr(entry, "summary", "")
+            clean_desc = re.sub(r'<[^<]+?>', '', desc)[:800].strip() or f"লোকাল বিডি অপরচুনিটি: {clean_title}"
+
+            job = {
+                "id": f"bd_{abs(hash(apply_url))}",
+                "source": "Bdjobs / Bikroy (বাংলাদেশ)",
+                "title": f"🇧🇩 {clean_title}",
+                "company": company,
+                "url": apply_url,
+                "description": clean_desc,
+                "contact_email": "",
+                "budget_or_prize": "আলোচনা সাপেক্ষ (৳১৫,০০০ - ৳৩৫,০০০)",
+                "match_score": 96,
+                "published_at": getattr(entry, "published", datetime.now(timezone.utc).isoformat()),
+                "type": "bd_gig"
+            }
+            jobs.append(job)
+    except Exception as e:
+        print(f"[LeadHunter] Notice: BD Tech Jobs: {e}")
+
+    return jobs
+
 # --- MULTI-SOURCE CONCURRENT SCANNER ---
 def scan_all_real_sources() -> List[Dict[str, Any]]:
     """
-    Executes real scraping across all platforms (Reddit, Freelancer, RemoteOK, WeWorkRemotely, Devpost)
+    Executes real scraping across all platforms (Bangladesh Bdjobs/Bikroy, Reddit, Freelancer, RemoteOK, Devpost)
     and returns un-seen qualified leads.
     """
     all_found = []
 
-    # 1. Reddit r/forhire & r/slavelabour
+    # 1. Bangladesh Local Tech Jobs & Gigs (Bdjobs & Bikroy) - TOP PRIORITY
+    print("[LeadHunter] 🔍 Scanning Bangladesh Local Tech Jobs (Bdjobs / Bikroy)...")
+    all_found.extend(fetch_bangladesh_tech_jobs())
+
+    # 2. Reddit r/forhire & r/slavelabour
     print("[LeadHunter] 🔍 Scanning Reddit r/forhire...")
     all_found.extend(fetch_reddit_sub("forhire"))
 
     print("[LeadHunter] 🔍 Scanning Reddit r/slavelabour...")
     all_found.extend(fetch_reddit_sub("slavelabour"))
 
-    # 2. Freelancer.com (Micro & Regional Tasks)
+    # 3. Freelancer.com (Micro & Regional Tasks)
     print("[LeadHunter] 🔍 Scanning Freelancer.com Micro Tasks...")
     all_found.extend(fetch_freelancer_jobs())
 
-    # 3. RemoteOK
+    # 4. RemoteOK
     print("[LeadHunter] 🔍 Scanning RemoteOK Public API...")
     all_found.extend(fetch_remoteok_jobs())
 
-    # 4. WeWorkRemotely
+    # 5. WeWorkRemotely
     print("[LeadHunter] 🔍 Scanning WeWorkRemotely RSS...")
     all_found.extend(fetch_weworkremotely_jobs())
 
-    # 5. Devpost Hackathons
+    # 6. Devpost Hackathons
     print("[LeadHunter] 🔍 Scanning Devpost Hackathons API...")
     all_found.extend(fetch_devpost_hackathons())
 
-    # Sort with client gigs and hackathons first, then highest match score
-    priority_order = {"client_gig": 1, "hackathon": 2, "remote_job": 3}
-    all_found.sort(key=lambda x: (priority_order.get(x.get("type", "remote_job"), 4), -x.get("match_score", 0)))
+    # Sort with Bangladesh local gigs first, then client micro gigs, then hackathons
+    priority_order = {"bd_gig": 1, "client_gig": 2, "hackathon": 3, "remote_job": 4}
+    all_found.sort(key=lambda x: (priority_order.get(x.get("type", "remote_job"), 5), -x.get("match_score", 0)))
 
     print(f"[LeadHunter] ✅ Total Real Leads Discovered: {len(all_found)}")
     return all_found

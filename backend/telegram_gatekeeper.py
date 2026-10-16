@@ -9,6 +9,8 @@ import os
 import sys
 import json
 import smtplib
+import subprocess
+import speech_recognition as sr
 
 # Set UTF-8 encoding for Windows terminal
 if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
@@ -377,10 +379,48 @@ def run_interactive_bot():
 
     @bot.message_handler(content_types=['voice', 'audio'])
     def handle_voice(message):
-        bot.reply_to(
-            message,
-            "জুবায়ের ভাই, আপনার ভয়েস পেয়েছি! ভয়েস-টু-টেক্সট ইঞ্জিন যুক্ত হচ্ছে, আপাতত টাইপ করে লিখলে সাথে সাথে উত্তর দেব।"
-        )
+        chat_id = message.chat.id
+        bot.send_chat_action(chat_id, "record_audio")
+        try:
+            file_info = bot.get_file(message.voice.file_id if message.voice else message.audio.file_id)
+            downloaded = bot.download_file(file_info.file_path)
+
+            temp_dir = os.path.join(root_dir, "data", "temp_voice")
+            os.makedirs(temp_dir, exist_ok=True)
+            ogg_path = os.path.join(temp_dir, f"voice_{message.message_id}.ogg")
+            wav_path = os.path.join(temp_dir, f"voice_{message.message_id}.wav")
+
+            with open(ogg_path, "wb") as f:
+                f.write(downloaded)
+
+            # Convert audio to 16kHz mono WAV via ffmpeg
+            cmd = ["ffmpeg", "-y", "-i", ogg_path, "-ar", "16000", "-ac", "1", wav_path]
+            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+
+            recognizer = sr.Recognizer()
+            with sr.AudioFile(wav_path) as source:
+                audio_data = recognizer.record(source)
+                try:
+                    # Recognize Bengali first
+                    transcribed = recognizer.recognize_google(audio_data, language="bn-BD")
+                except Exception:
+                    # Fallback to English
+                    transcribed = recognizer.recognize_google(audio_data, language="en-US")
+
+            # Clean temporary files
+            for p in [ogg_path, wav_path]:
+                if os.path.exists(p):
+                    try: os.remove(p)
+                    except: pass
+
+            if transcribed and transcribed.strip():
+                bot.reply_to(message, f"🎙️ *শুনেছি:* \"{transcribed}\"")
+                message.text = transcribed
+                handle_chat(message)
+            else:
+                bot.reply_to(message, "🎙️ ভাই, ভয়েস স্পষ্টভাবে বোঝা যায়নি। আরেকবার বলবেন কি?")
+        except Exception as e:
+            bot.reply_to(message, f"🎙️ ভয়েস প্রসেস করতে একটি নোটিশ এসেছে: {str(e)[:100]}। অনুগ্রহ করে লিখে পাঠান।")
 
     bot.infinity_polling(timeout=20, long_polling_timeout=10)
 
