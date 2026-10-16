@@ -22,13 +22,15 @@ SEEN_FILE = os.path.join(DATA_DIR, "seen_ids.json")
 LEADS_FILE = os.path.join(DATA_DIR, "live_leads.json")
 LEADS_JS_FILE = os.path.join(DATA_DIR, "live_leads.js")
 
-# Core keywords representing Jubayer Ahmad's technical stack + micro-tasks + regional gigs
+# Core keywords representing Jubayer Ahmad's technical stack + micro-tasks + regional / Bangladesh gigs
 CORE_KEYWORDS = [
     "python", "bot", "telegram", "scraper", "automation", "ai",
     "website", "nextjs", "react", "full-stack", "fullstack",
     "script", "video", "ffmpeg", "api", "dashboard", "developer", "web",
     "bug", "fix", "quick", "small task", "micro task", "wordpress",
-    "data entry", "bangladesh", "india", "pakistan", "bdt", "inr"
+    "data entry", "bangladesh", "india", "pakistan", "bdt", "inr",
+    "টাকা", "বিকাশ", "নগদ", "ওয়েবসাইট", "ল্যান্ডিং পেজ", "ওয়ার্ডপ্রেস",
+    "bkash", "nagad", "taka", "landing page", "junior", "internship"
 ]
 
 HEADERS = {
@@ -89,11 +91,13 @@ def extract_email(text: str) -> str:
     valid = [e for e in matches if not any(x in e.lower() for x in ["example.com", "domain.com", "reddit.com"])]
     return valid[0] if valid else ""
 
-def extract_budget(text: str, default: str = "Negotiable / Competitive") -> str:
+def extract_budget(text: str, default: str = "Negotiable / আলোচনা সাপেক্ষ") -> str:
     if not text:
         return default
-    # Match patterns like $50, $50/hr, $50-$100, 100 USD
+    # Match patterns like ৳5000, 5000 টাকা, 5,000 BDT, $50, $50/hr, $50-$100, 100 USD
     patterns = [
+        r'(?:৳|টাকা|bdt|BDT)\s*\d+(?:,\d+)*(?:\s*-\s*\d+(?:,\d+)*)?',
+        r'\d+(?:,\d+)*\s*(?:৳|টাকা|bdt|BDT)',
         r'\$\s*\d+(?:,\d+)*(?:\s*-\s*\$\s*\d+(?:,\d+)*)?(?:\s*\/\s*(?:hr|hour|fixed|project|month|day))?',
         r'\d+(?:,\d+)*\s*(?:USD|usd|\$|dollars|EUR|GBP)',
         r'\[\$?\s*\d+[^\]]*\]'

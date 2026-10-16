@@ -215,40 +215,159 @@ def run_interactive_bot():
             f"💼 সরাসরি Reddit ক্লায়েন্ট গিগ: `{gigs}টি`\n"
             f"🏆 Devpost গ্লোবাল হ্যাকাথন: `{hacks}টি`\n"
             f"🌍 রিমোট প্রোগ্রামিং জব: `{jobs}টি`\n"
-            f"👁️ মোট স্ক্যানকৃত ও ট্র্যাকিং আইডি: `{len(seen)}টি`\n"
             f"━━━━━━━━━━━━━━━━━━━\n"
             f"নতুন কাজ সার্চ করতে চাপুন: `/scan`"
         )
         bot.reply_to(message, stat_msg)
 
+    # In-memory session tracking for active conversation
+    user_cached_leads = {}
+
+    def send_numbered_leads_summary(chat_id):
+        leads = load_live_leads()
+        if not leads:
+            leads = scan_all_real_sources()[:5]
+            save_live_leads(leads)
+        
+        # Prioritize beginner-friendly micro gigs & regional tasks
+        selected = leads[:5]
+        user_cached_leads[chat_id] = selected
+        
+        summary_text = (
+            f"👑 **সালাম জুবায়ের ভাই!**\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"আমি আপনার জন্য বর্তমানের শীর্ষ ৫টি সহজ ও প্র্যাকটিক্যাল কাজের তালিকা তৈরি করেছি:\n\n"
+        )
+        
+        for idx, l in enumerate(selected, 1):
+            title = l.get("title", "")[:55]
+            budget = l.get("budget_or_prize", "আলোচনা সাপেক্ষ")
+            # If budget in USD, add approximate BDT conversion for beginner clarity
+            if "$" in budget:
+                nums = re.findall(r'\d+', budget.replace(",", ""))
+                if nums:
+                    val = int(nums[0])
+                    bdt_val = val * 122
+                    budget = f"{budget} (প্রায় ৳{bdt_val:,})"
+            source = l.get("source", "Web")
+            summary_text += f"📌 **{idx}. {title}**\n💰 বাজেট: `{budget}` | উৎস: `{source}`\n\n"
+            
+        summary_text += (
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"👉 **কোন কাজটি নিয়ে বিস্তারিত জানতে চান?**\n"
+            f"শুধু **১**, **২**, **৩** বা কাজের নম্বর লিখে রিপ্লাই দিন।\n"
+            f"আমি আপনাকে ক্লায়েন্টের শর্ত, কাজটি কীভাবে করবেন এবং ক্লায়েন্টকে পাঠানোর রেডিমেড ইনবক্স মেসেজ বুঝিয়ে দিচ্ছি!"
+        )
+        bot.send_message(chat_id, summary_text)
+
+    def explain_selected_lead(chat_id, index):
+        cached = user_cached_leads.get(chat_id, [])
+        if not cached:
+            cached = load_live_leads()[:5]
+            user_cached_leads[chat_id] = cached
+            
+        if not (1 <= index <= len(cached)):
+            bot.send_message(chat_id, f"⚠️ দুঃখিত জুবায়ের ভাই, ১ থেকে {len(cached)}-এর মধ্যে যেকোনো একটি নম্বর বেছে নিন।")
+            return
+            
+        lead = cached[index - 1]
+        title = lead.get("title", "")
+        desc = lead.get("description", "")
+        budget = lead.get("budget_or_prize", "আলোচনা সাপেক্ষ")
+        if "$" in budget:
+            nums = re.findall(r'\d+', budget.replace(",", ""))
+            if nums:
+                val = int(nums[0])
+                budget = f"{budget} (প্রায় ৳{val*122:,})"
+                
+        source = lead.get("source", "Web")
+        url = lead.get("url", "")
+        b_summary = lead.get("bengali_summary") or "ক্লায়েন্টের জন্য উপযুক্ত প্রজেক্ট।"
+        pitch = lead.get("ai_pitch") or ""
+        
+        explanation = (
+            f"🎯 **কাজের বিশ্লেষণ (নম্বর {index}):**\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"📌 **কাজের নাম:** {title}\n"
+            f"💰 **বাজেট:** `{budget}`\n"
+            f"🏢 **উৎস:** `{source}`\n\n"
+            f"🇧🇩 **ক্লায়েন্ট আসলে কী চাইছে (সহজ বাংলায়):**\n"
+            f"{b_summary}\n\n"
+            f"🛠️ **জুবায়ের ভাই কীভাবে কাজটি শুরু করবেন:**\n"
+            f"১. ক্লায়েন্টের চাহিদা অনুযায়ী মূল রিকোয়ারমেন্ট বুঝুন।\n"
+            f"২. জটিল কোডিং ছাড়া সহজ লজিক বা রেডিমেড প্লাগইন/স্ক্রিপ্ট ব্যবহার করুন।\n"
+            f"৩. নিচে দেওয়া ইনবক্স প্রপোজালটি কপি করে ক্লায়েন্টকে ইনবক্স বা হোয়াটসঅ্যাপে পাঠিয়ে দিন।\n\n"
+            f"✉️ **ক্লায়েন্টকে পাঠানোর রেডিমেড মেসেজ (ট্যাপ করে কপি করুন):**\n"
+            f"```text\n{pitch if pitch else 'সালাম ভাই, আপনার পোস্টটি দেখলাম। আমি আপনার কাজটি আজকেই সফলভাবে কমপ্লিট করে দিতে পারব। আপনি ফ্রি থাকলে ইনবক্সে বিস্তারিত আলোচনা করতে পারি।'}\n```\n\n"
+            f"🔗 **মূল পোস্টের লিংক:**\n{url}\n\n"
+            f"💡 *টিপস: কোনো ফর্ম পূরণ করতে হলে বা ফেসবুক পোস্টের স্ক্রিনশট থাকলে আমাকে দিন, আমি পুরো উত্তর লিখে দেব!*"
+        )
+        
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton(text="🔗 মূল পোস্ট ও ক্লায়েন্ট ইনবক্স লিংক", url=url))
+        bot.send_message(chat_id, explanation, reply_markup=markup)
+
     @bot.message_handler(commands=["scan"])
     def cmd_scan(message):
-        bot.reply_to(message, "🔍 Reddit, RemoteOK ও Devpost-এ তাজা সুযোগ স্ক্যান শুরু হয়েছে... অনুগ্রহ করে কয়েক সেকেন্ড অপেক্ষা করুন।")
-        count = run_cron_cycle(max_notifications=2)
-        bot.send_message(message.chat.id, f"✅ স্ক্যান শেষ! ড্যাশবোর্ডে দেখুন: https://jubayer-ai-studio.github.io/special-agent/")
-
-    @bot.message_handler(commands=["hackathons"])
-    def cmd_hacks(message):
-        bot.reply_to(message, "🏆 Devpost-এর লাইভ ওপেন হ্যাকাথন খোঁজা হচ্ছে...")
-        hacks = fetch_devpost_hackathons()
-        if not hacks:
-            bot.reply_to(message, "ℹ️ বর্তমানে নতুন কোনো আন-রেজিস্টার্ড হ্যাকাথন পাওয়া যায়নি।")
-            return
-        for h in hacks[:2]:
-            b_summary, a_pitch = generate_pitch(h)
-            h["bengali_summary"] = b_summary
-            h["ai_pitch"] = a_pitch
-            card_text, markup = format_telegram_card(h)
-            bot.send_message(message.chat.id, card_text, reply_markup=markup)
+        bot.reply_to(message, "🔍 নতুন লোকাল ও বিগিনার-বান্ধব কাজগুলো খোঁজা হচ্ছে... অনুগ্রহ করে একটু অপেক্ষা করুন।")
+        send_numbered_leads_summary(message.chat.id)
 
     @bot.message_handler(func=lambda m: True)
     def handle_chat(message):
-        # Open conversational reasoning turn
-        user_text = message.text
-        bot.reply_to(
-            message,
-            f"জুবায়ের ভাই, আমি আপনার বার্তা পেয়েছি। নতুন ক্লায়েন্ট বা জব খুঁজতে `/scan` চাপুন অথবা সরাসরি ড্যাশবোর্ড দেখুন: https://jubayer-ai-studio.github.io/special-agent/"
-        )
+        chat_id = message.chat.id
+        text = message.text.strip()
+        text_lower = text.lower()
+        
+        # Check if user typed a lead number (1, 2, 3, 4, 5 or Bengali ১, ২, ৩, ৪, ৫)
+        bengali_digits = {'১': 1, '২': 2, '৩': 3, '৪': 4, '৫': 5}
+        target_num = None
+        
+        if text.isdigit() and 1 <= int(text) <= 10:
+            target_num = int(text)
+        elif text in bengali_digits:
+            target_num = bengali_digits[text]
+        elif any(w in text_lower for w in ["১ নম্বর", "১ নাম্বার", "১নং", "1 number", "number 1"]):
+            target_num = 1
+        elif any(w in text_lower for w in ["২ নম্বর", "২ নাম্বার", "২নং", "2 number", "number 2"]):
+            target_num = 2
+        elif any(w in text_lower for w in ["৩ নম্বর", "৩ নাম্বার", "৩নং", "3 number", "number 3"]):
+            target_num = 3
+        elif any(w in text_lower for w in ["৪ নম্বর", "৪ নাম্বার", "৪নং", "4 number", "number 4"]):
+            target_num = 4
+        elif any(w in text_lower for w in ["৫ নম্বর", "৫ নাম্বার", "৫নং", "5 number", "number 5"]):
+            target_num = 5
+            
+        if target_num is not None:
+            explain_selected_lead(chat_id, target_num)
+            return
+
+        # Check if user is asking for jobs or summary
+        job_inquiry_keywords = ["কাজ", "অর্ডার", "স্ক্যান", "scan", "list", "তালিকা", "নতুন কাজ", "কি আছে", "কি কি কাজ"]
+        if any(k in text_lower for k in job_inquiry_keywords):
+            send_numbered_leads_summary(chat_id)
+            return
+
+        # Conversational / Mentoring Mode via Hermes Brain or intelligent local reasoning
+        bot.send_chat_action(chat_id, "typing")
+        try:
+            from backend.brain.hermes_brain import hermes_brain
+            prompt = (
+                f"User Jubayer Ahmad is a beginner software engineer in Bangladesh.\n"
+                f"He is asking: '{text}'.\n"
+                f"Act as his wise, elder brother and senior technical mentor (জুবায়ের ভাইয়ের সিনিয়র টেক মেন্টর ও বড় ভাই).\n"
+                f"Reply in warm, highly encouraging, clear, natural Bengali.\n"
+                f"If he shared a job post or form, extract what needs to be answered and write the exact text for him to copy-paste.\n"
+                f"Keep it realistic, practical, focused on local/Bangladesh opportunities and beginner confidence. NEVER cut off mid-sentence."
+            )
+            reply = hermes_brain.chat(prompt, user_name="Jubayer")
+            bot.reply_to(message, reply)
+        except Exception as e:
+            fallback = (
+                f"জুবায়ের ভাই, আমি আপনার মেসেজটি পেয়েছি: '{text}'。\n\n"
+                f"বর্তমান সহজ কাজগুলো দেখতে লিখুন: `/scan` অথবা 'কাজ কি আছে'।\n"
+                f"আর কোনো ফর্মের স্ক্রিনশট বা পোস্ট থাকলে সরাসরি এখানে পেস্ট করে দিন, আমি উত্তর লিখে দিচ্ছি!"
+            )
+            bot.reply_to(message, fallback)
 
     bot.infinity_polling(timeout=20, long_polling_timeout=10)
 
