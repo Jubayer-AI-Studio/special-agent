@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jubayer AI Hunter - 24/7 Mission Control</title>
+  <!-- PWA Meta & Manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <!-- Tailwind CSS & Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -69,6 +75,10 @@
       </div>
 
       <div class="flex items-center gap-3">
+        <button id="pwaInstallBtn" onclick="installPWA()" class="hidden px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white shadow-lg shadow-indigo-500/25 text-xs font-semibold flex items-center gap-1.5 transition">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>মোবাইলে অ্যাপ ইনস্টল করুন</span>
+        </button>
         <a href="https://t.me/Jubayer_agent_bot" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-semibold flex items-center gap-1.5 transition">
           <i data-lucide="send" class="w-3.5 h-3.5"></i>
           @Jubayer_agent_bot
@@ -322,6 +332,39 @@
 
     // Auto initialize
     window.addEventListener('DOMContentLoaded', loadData);
+
+    // PWA Service Worker Registration & Install Prompt
+    let deferredPrompt;
+    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+          .catch(err => console.log('[PWA] SW registration notice:', err));
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('pwaInstallBtn');
+      if (installBtn) installBtn.classList.remove('hidden');
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('[PWA] User installed the app');
+          }
+          deferredPrompt = null;
+          const installBtn = document.getElementById('pwaInstallBtn');
+          if (installBtn) installBtn.classList.add('hidden');
+        });
+      } else {
+        alert("মোবাইলে ইনস্টল করতে: ব্রাউজারের ৩টি ডট মেনুতে চাপ দিয়ে 'Add to Home screen' বা 'Install app'-এ চাপুন।");
+      }
+    }
   </script>
 </body>
 </html>

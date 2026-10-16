@@ -9,9 +9,19 @@ Zero fake data, zero mocks.
 """
 
 import os
+import sys
 import json
 import re
 import time
+
+# Set UTF-8 encoding for Windows terminal
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 import requests
 import feedparser
 from datetime import datetime, timezone
