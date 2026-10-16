@@ -9,6 +9,14 @@ import os
 import sys
 import json
 import smtplib
+
+# Set UTF-8 encoding for Windows terminal
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import telebot
@@ -347,27 +355,32 @@ def run_interactive_bot():
             send_numbered_leads_summary(chat_id)
             return
 
-        # Conversational / Mentoring Mode via Hermes Brain or intelligent local reasoning
+        # Conversational & Wingman Mode via Hermes Brain (Calibrated to Jubayer's exact preference)
         bot.send_chat_action(chat_id, "typing")
         try:
             from backend.brain.hermes_brain import hermes_brain
             prompt = (
-                f"User Jubayer Ahmad is a beginner software engineer in Bangladesh.\n"
-                f"He is asking: '{text}'.\n"
-                f"Act as his wise, elder brother and senior technical mentor (জুবায়ের ভাইয়ের সিনিয়র টেক মেন্টর ও বড় ভাই).\n"
-                f"Reply in warm, highly encouraging, clear, natural Bengali.\n"
-                f"If he shared a job post or form, extract what needs to be answered and write the exact text for him to copy-paste.\n"
-                f"Keep it realistic, practical, focused on local/Bangladesh opportunities and beginner confidence. NEVER cut off mid-sentence."
+                f"Operator: Jubayer Ahmad (Full Stack Developer & AI Specialist in Bangladesh).\n"
+                f"User Message: '{text}'.\n\n"
+                f"Your Persona & Strict Rules:\n"
+                f"1. Identity: You are Jubayer's sharp, loyal, respectful junior assistant and technical wingman (জুবায়ের ভাইয়ের চটপটে ছোট ভাই ও ডানহাত)। Address him respectfully as 'জুবায়ের ভাই' when needed, but never call yourself 'বড় ভাই'.\n"
+                f"2. Strict Conciseness: Jump STRAIGHT to the answer. NO filler words, NO unnecessary greetings like 'হ্যালো', 'কেমন আছেন', 'আশা করি ভালো আছেন' or fluff. Be 100% to-the-point.\n"
+                f"3. Default Length: Keep normal answers short, crisp, and direct (1-3 sentences). ONLY provide long, detailed, step-by-step breakdowns if Jubayer explicitly asks ('বিস্তারিত বলো', 'ভেঙ্গে বলো', 'ডিটেইলস দাও').\n"
+                f"4. Language: Jubayer may talk in Banglish (e.g., 'kemon acho', 'kaj dekhao'), casual Bengali, or English. Understand everything effortlessly and reply in clean, natural Bengali or Banglish as appropriate.\n"
+                f"5. Tasks & Forms: If Jubayer shares a client post, requirement, or form question, instantly give him the exact copy-paste inbox DM or form answers without any intro."
             )
             reply = hermes_brain.chat(prompt, user_name="Jubayer")
             bot.reply_to(message, reply)
         except Exception as e:
-            fallback = (
-                f"জুবায়ের ভাই, আমি আপনার মেসেজটি পেয়েছি: '{text}'。\n\n"
-                f"বর্তমান সহজ কাজগুলো দেখতে লিখুন: `/scan` অথবা 'কাজ কি আছে'।\n"
-                f"আর কোনো ফর্মের স্ক্রিনশট বা পোস্ট থাকলে সরাসরি এখানে পেস্ট করে দিন, আমি উত্তর লিখে দিচ্ছি!"
-            )
+            fallback = f"জুবায়ের ভাই, সিস্টেমের একটি ছোট নোটিশ এসেছে। কাজ দেখতে `/scan` লিখুন।"
             bot.reply_to(message, fallback)
+
+    @bot.message_handler(content_types=['voice', 'audio'])
+    def handle_voice(message):
+        bot.reply_to(
+            message,
+            "জুবায়ের ভাই, আপনার ভয়েস পেয়েছি! ভয়েস-টু-টেক্সট ইঞ্জিন যুক্ত হচ্ছে, আপাতত টাইপ করে লিখলে সাথে সাথে উত্তর দেব।"
+        )
 
     bot.infinity_polling(timeout=20, long_polling_timeout=10)
 
