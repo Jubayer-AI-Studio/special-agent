@@ -45,11 +45,19 @@ FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 @app.on_event("startup")
 async def startup_event():
     # If running in persistent cloud container (Render, Railway, Docker, Local)
-    if not os.getenv("VERCEL") and os.getenv("ENABLE_BG_RADAR", "true").lower() == "true":
-        from backend.main import run_radar_loop
-        interval = int(os.getenv("SCAN_INTERVAL_SECONDS", "300"))
-        asyncio.create_task(run_radar_loop(interval_seconds=interval))
-        print(f"🛰️ [Background Engine] 24/7 Autonomous Job Radar spawned concurrently (every {interval}s).")
+    if not os.getenv("VERCEL"):
+        import threading
+        if os.getenv("ENABLE_BG_BOT", "true").lower() == "true":
+            from backend.telegram_gatekeeper import run_interactive_bot
+            bot_thread = threading.Thread(target=run_interactive_bot, daemon=True)
+            bot_thread.start()
+            print("🤖 [Cloud Gateway] 24/7 Interactive Telegram Bot spawned concurrently in background thread.")
+
+        if os.getenv("ENABLE_BG_RADAR", "true").lower() == "true":
+            from backend.main import run_radar_loop
+            interval = int(os.getenv("SCAN_INTERVAL_SECONDS", "300"))
+            asyncio.create_task(run_radar_loop(interval_seconds=interval))
+            print(f"🛰️ [Background Engine] 24/7 Autonomous Job Radar spawned concurrently (every {interval}s).")
 
 @app.get("/")
 async def serve_index():
