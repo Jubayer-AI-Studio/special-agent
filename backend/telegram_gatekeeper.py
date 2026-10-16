@@ -7,6 +7,7 @@ Supports:
 
 import os
 import sys
+import re
 import json
 import smtplib
 import subprocess
