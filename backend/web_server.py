@@ -59,6 +59,28 @@ async def serve_index():
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>Jubayer AI Hunter API Online</h1><p>Frontend file loading...</p>")
 
+@app.get("/manifest.json")
+async def serve_manifest():
+    manifest_file = os.path.join(FRONTEND_DIR, "manifest.json")
+    if os.path.exists(manifest_file):
+        return FileResponse(manifest_file, media_type="application/manifest+json")
+    return {"name": "Special Agent"}
+
+@app.get("/sw.js")
+async def serve_sw():
+    sw_file = os.path.join(FRONTEND_DIR, "sw.js")
+    if os.path.exists(sw_file):
+        return FileResponse(sw_file, media_type="application/javascript")
+    raise HTTPException(status_code=404)
+
+icons_dir = os.path.join(FRONTEND_DIR, "icons")
+if os.path.exists(icons_dir):
+    app.mount("/icons", StaticFiles(directory=icons_dir), name="icons")
+
+data_dir = os.path.join(FRONTEND_DIR, "data")
+if os.path.exists(data_dir):
+    app.mount("/data", StaticFiles(directory=data_dir), name="data")
+
 @app.get("/api/analytics")
 async def api_analytics():
     return get_dashboard_analytics()
