@@ -328,6 +328,7 @@ def run_interactive_bot():
         chat_id = message.chat.id
         text = message.text.strip()
         text_lower = text.lower()
+        print(f"📩 [Telegram Message]: {text[:60]}")
         
         # Check if user typed a lead number (1, 2, 3, 4, 5 or Bengali ১, ২, ৩, ৪, ৫)
         bengali_digits = {'১': 1, '২': 2, '৩': 3, '৪': 4, '৫': 5}
@@ -381,6 +382,7 @@ def run_interactive_bot():
     @bot.message_handler(content_types=['voice', 'audio'])
     def handle_voice(message):
         chat_id = message.chat.id
+        print(f"🎙️ [Voice received from chat {chat_id}]")
         bot.send_chat_action(chat_id, "record_audio")
         try:
             file_info = bot.get_file(message.voice.file_id if message.voice else message.audio.file_id)
