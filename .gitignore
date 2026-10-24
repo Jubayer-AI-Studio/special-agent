@@ -38,3 +38,5 @@ data/*.sqlite3
 Thumbs.db
 
 .vercel
+
+.github/
