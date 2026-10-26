@@ -203,6 +203,55 @@ async def telegram_webhook(request: Request):
         text = msg.get("text", "").strip()
         first_name = msg.get("from", {}).get("first_name", "জুবায়ের")
 
+        # Handle Voice / Audio Notes seamlessly
+        if ("voice" in msg or "audio" in msg) and not text:
+            voice_obj = msg.get("voice") or msg.get("audio")
+            file_id = voice_obj.get("file_id") if voice_obj else None
+            transcribed = None
+            if file_id and token:
+                try:
+                    get_file_url = f"https://api.telegram.org/bot{token}/getFile?file_id={file_id}"
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(get_file_url, timeout=10) as gf_resp:
+                            gf_data = await gf_resp.json()
+                            if gf_data.get("ok"):
+                                rel_path = gf_data["result"]["file_path"]
+                                dl_url = f"https://api.telegram.org/file/bot{token}/{rel_path}"
+                                async with session.get(dl_url, timeout=15) as dl_resp:
+                                    ogg_bytes = await dl_resp.read()
+                                    
+                                    import shutil, tempfile, subprocess
+                                    if shutil.which("ffmpeg"):
+                                        with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tf_ogg:
+                                            tf_ogg.write(ogg_bytes)
+                                            tf_ogg_path = tf_ogg.name
+                                        tf_wav_path = tf_ogg_path + ".wav"
+                                        try:
+                                            cmd = ["ffmpeg", "-y", "-i", tf_ogg_path, "-ar", "16000", "-ac", "1", tf_wav_path]
+                                            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+                                            import speech_recognition as sr
+                                            recognizer = sr.Recognizer()
+                                            with sr.AudioFile(tf_wav_path) as source:
+                                                audio_data = recognizer.record(source)
+                                                try:
+                                                    transcribed = recognizer.recognize_google(audio_data, language="bn-BD")
+                                                except Exception:
+                                                    transcribed = recognizer.recognize_google(audio_data, language="en-US")
+                                        finally:
+                                            for p in [tf_ogg_path, tf_wav_path]:
+                                                if os.path.exists(p):
+                                                    try: os.remove(p)
+                                                    except: pass
+                except Exception as e:
+                    print(f"Voice transcription error: {e}")
+
+            if transcribed and transcribed.strip():
+                await send_tg(token, chat_id, f"🎙️ *শুনেছি:* \"{transcribed}\"")
+                text = transcribed
+            else:
+                await send_tg(token, chat_id, "🎙️ জুবায়ের ভাই, আপনার ভয়েস মেসেজ পেয়েছি! ক্লাউড সার্ভারলেস মোডে অডিও স্পষ্ট করতে পারছি না। অনুগ্রহ করে সংক্ষেপে লিখে পাঠান, আমি সাথে সাথে বুঝিয়ে দিচ্ছি!")
+                return {"ok": True}
+
         if text.startswith("/start"):
             reply = (
                 f"👑 **সালাম {first_name} ভাই!**\n"
@@ -295,8 +344,19 @@ async def telegram_webhook(request: Request):
             # 1. Fetch recent conversation memory for contextual continuity
             history = get_recent_chat_history(chat_id, limit=6)
             
+            prompt = (
+                f"Operator: Jubayer Ahmad (Full Stack Developer & AI Specialist in Bangladesh).\n"
+                f"User Message: '{text}'.\n\n"
+                f"Your Persona & Strict Rules:\n"
+                f"1. Identity: You are Jubayer's sharp, loyal, respectful junior assistant and technical wingman (জুবায়ের ভাইয়ের চটপটে ছোট ভাই ও ডানহাত)। Address him respectfully as 'জুবায়ের ভাই' when needed, but never call yourself 'বড় ভাই'.\n"
+                f"2. Strict Conciseness: Jump STRAIGHT to the answer. NO filler words, NO unnecessary greetings like 'হ্যালো', 'কেমন আছেন', 'আশা করি ভালো আছেন' or fluff. Be 100% to-the-point.\n"
+                f"3. Default Length: Keep normal answers short, crisp, and direct (1-3 sentences). ONLY provide long, detailed, step-by-step breakdowns if Jubayer explicitly asks ('বিস্তারিত বলো', 'ভেঙ্গে বলো', 'ডিটেইলস দাও').\n"
+                f"4. Language: Jubayer may talk in Banglish (e.g., 'kemon acho', 'kaj dekhao'), casual Bengali, or English. Understand everything effortlessly and reply in clean, natural Bengali or Banglish as appropriate.\n"
+                f"5. Tasks & Forms: If Jubayer shares a client post, requirement, or form question, instantly give him the exact copy-paste inbox DM or form answers without any intro."
+            )
+            
             # 2. Engage Nous Hermes 3 70B Reasoning Engine (non-blocking)
-            hermes_reply = await asyncio.to_thread(hermes_brain.chat, text, first_name, history)
+            hermes_reply = await asyncio.to_thread(hermes_brain.chat, prompt, first_name, history)
             
             # 3. Persist conversation turn in database
             save_chat_message(chat_id, "user", text)
