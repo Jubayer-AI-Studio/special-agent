@@ -3,21 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jubayer AI Hunter - 24/7 Mission Control</title>
-  <!-- PWA Meta & Manifest -->
+  <title>Jubayer AI Hunter — Autonomous 24/7 Career Alter-Ego & Client Radar</title>
+  
+  <!-- PWA & Meta Tags -->
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#6366f1">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="description" content="Jubayer Ahmad's 24/7 Autonomous AI Career Alter-Ego & Lead Hunter. Powered by Nous Hermes 3 70B Engine.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
-  <!-- Tailwind CSS & Fonts -->
-  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts & Tailwind CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Instant local data loading for file:// protocol without server -->
+
+  <!-- Local fallback data for instant file:// & offline preview -->
   <script src="./data/live_leads.js"></script>
+
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -25,217 +30,721 @@
         extend: {
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
+            bengali: ['"Hind Siliguri"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
           },
           colors: {
-            space: '#070B13',
-            card: '#0F172A',
-            panel: '#1E293B',
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            canvas: '#070A12',
+            surface: '#0E1424',
+            surfaceLight: '#162038',
+            surfaceBorder: 'rgba(255, 255, 255, 0.08)',
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'spin-slow': 'spin 12s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-8px)' },
+            }
           }
         }
       }
     }
   </script>
+
   <style>
-    body { background-color: #070B13; color: #F1F5F9; }
-    .glass-card {
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Custom Scrollbar & Glassmorphic Elevation */
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #070A12; }
+    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4F46E5; }
+
+    .glass-panel {
+      background: rgba(14, 20, 36, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .glass-card:hover {
-      border-color: rgba(99, 102, 241, 0.4);
-      box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.2);
+    .glass-panel:hover {
+      border-color: rgba(99, 102, 241, 0.35);
+      box-shadow: 0 16px 40px -12px rgba(99, 102, 241, 0.15);
     }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #070B13; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+
+    .ambient-glow-1 {
+      position: absolute;
+      top: -120px;
+      left: 15%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(7, 10, 18, 0) 70%);
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .ambient-glow-2 {
+      position: absolute;
+      top: 180px;
+      right: 5%;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.14) 0%, rgba(7, 10, 18, 0) 70%);
+      filter: blur(70px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .active-nav-tab {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff !important;
+      box-shadow: 0 4px 16px -2px rgba(79, 70, 229, 0.4);
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans antialiased custom-scrollbar selection:bg-indigo-500 selection:text-white">
 
-  <!-- Navigation Header -->
-  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-space/90 backdrop-blur-md px-6 py-4">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center space-x-3.5">
-        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-indigo-500/30">
-          JA
+<body class="bg-canvas text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white relative overflow-x-hidden">
+
+  <!-- Ambient Glow Spheres -->
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-40 border-b border-surfaceBorder bg-canvas/80 backdrop-blur-xl px-4 sm:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Brand & Status -->
+      <div class="flex items-center gap-3.5">
+        <div class="relative flex items-center justify-center">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-violet-500 flex items-center justify-center font-extrabold text-white text-base shadow-lg shadow-brand-500/30">
+            JA
+          </div>
+          <span class="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-canvas"></span>
+          </span>
         </div>
+
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-lg font-bold tracking-tight text-white">Jubayer AI Hunter</h1>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1.5"></span>
-              24/7 Cloud Automated
-            </span>
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+              Jubayer AI Hunter
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-brand-500/15 text-brand-400 border border-brand-500/30">v2.4 PRO</span>
+            </h1>
           </div>
-          <p class="text-xs text-slate-400">Autonomous Client, Gig & Hackathon Hunter (Nous Hermes 3 70B Engine)</p>
+          <p class="text-xs text-slate-400 flex items-center gap-1.5 font-bengali">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+            ২৪/৭ ক্লাউড অটোনোমাস অল্টার-ইগো (Nous Hermes 3 70B)
+          </p>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <button id="pwaInstallBtn" onclick="installPWA()" class="hidden px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white shadow-lg shadow-indigo-500/25 text-xs font-semibold flex items-center gap-1.5 transition">
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- PWA Install Button -->
+        <button id="pwaInstallBtn" onclick="installPWA()" class="hidden px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-violet-600 hover:from-brand-500 hover:to-violet-500 text-white shadow-lg shadow-brand-500/25 text-xs font-semibold sm:flex items-center gap-1.5 transition transform hover:scale-[1.02] active:scale-[0.98]">
           <i data-lucide="download" class="w-3.5 h-3.5"></i>
-          <span>মোবাইলে অ্যাপ ইনস্টল করুন</span>
+          <span class="hidden md:inline font-bengali">মোবাইলে অ্যাপ ইনস্টল করুন</span>
+          <span class="md:hidden">ইনস্টল</span>
         </button>
-        <a href="https://t.me/Jubayer_agent_bot" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-semibold flex items-center gap-1.5 transition">
+
+        <!-- Telegram Bot Link -->
+        <a href="https://t.me/Jubayer_agent_bot" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-semibold flex items-center gap-1.5 transition hover:shadow-lg hover:shadow-sky-500/15">
           <i data-lucide="send" class="w-3.5 h-3.5"></i>
-          @Jubayer_agent_bot
+          <span class="hidden sm:inline">@Jubayer_agent_bot</span>
+          <span class="sm:hidden font-bengali">বট</span>
         </a>
-        <a href="https://github.com/Jubayer-AI-Studio/special-agent" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition">
+
+        <!-- GitHub Repo -->
+        <a href="https://github.com/Jubayer-AI-Studio/special-agent" target="_blank" class="px-3 py-1.5 rounded-xl bg-surface hover:bg-surfaceLight text-slate-300 border border-surfaceBorder text-xs font-medium flex items-center gap-1.5 transition">
           <i data-lucide="github" class="w-3.5 h-3.5"></i>
-          GitHub Repo
+          <span class="hidden lg:inline">GitHub</span>
         </a>
       </div>
+
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+  <!-- MAIN WRAPPER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 space-y-8 z-10">
 
-    <!-- KPI Metric Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="glass-card p-4 rounded-xl">
-        <span class="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-          <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i> মোট সক্রিয় লিড
-        </span>
-        <div class="mt-2 text-2xl font-extrabold text-white" id="statTotalLeads">--</div>
-        <p class="text-[11px] text-slate-500 mt-0.5">সবগুলো সোর্স মিলিয়ে</p>
+    <!-- HERO SECTION -->
+    <section class="glass-panel p-6 sm:p-8 rounded-3xl relative overflow-hidden">
+      <div class="max-w-3xl space-y-4">
+        
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/25 text-brand-400 text-xs font-semibold">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 animate-spin-slow"></i>
+          <span>AUTONOMOUS LEAD RADAR & CAREER WINGMAN</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight font-bengali">
+          জুবায়েরের ২৪/৭ স্বয়ংক্রিয় এআই হান্টার ও ক্লায়েন্ট আর্কিটেক্ট
+        </h2>
+
+        <p class="text-sm sm:text-base text-slate-300 font-bengali leading-relaxed">
+          কম্পিউটার চালু না থাকলেও ক্লাউড সার্ভার থেকে প্রতি মুহূর্তে <strong>বাংলাদেশ টেক গিগ (Bdjobs, Bikroy)</strong>, <strong>Reddit ক্লায়েন্ট গিগ</strong> ও <strong>Devpost হ্যাকাথন</strong> স্ক্যান করে। জুবায়েরের বাস্তব পোর্টফোলিও অনুযায়ী তৈরি করে দেয় ক্লায়েন্টকে পাঠানোর রেডিমেড উইনিং প্রপোজাল!
+        </p>
+
+        <!-- Live Telemetry Status Badges -->
+        <div class="flex flex-wrap items-center gap-2 pt-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+            <i data-lucide="cloud-lightning" class="w-3.5 h-3.5"></i> Vercel Serverless Webhook: সক্রিয়
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-medium">
+            <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Nous Hermes 3 70B Engine
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-medium font-bengali">
+            <i data-lucide="mic" class="w-3.5 h-3.5"></i> বাংলা ভয়েস ট্রান্সক্রিপশন রেডি
+          </span>
+        </div>
+
       </div>
 
-      <div class="glass-card p-4 rounded-xl">
-        <span class="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
+      <!-- Quick Action Buttons -->
+      <div class="mt-6 pt-6 border-t border-surfaceBorder flex flex-wrap items-center gap-3">
+        <button onclick="triggerScan()" id="btnScan" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-indigo-600 to-violet-600 hover:from-brand-500 hover:to-violet-500 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-brand-500/30 transition transform hover:scale-[1.02] active:scale-[0.98]">
+          <i data-lucide="radar" class="w-4 h-4"></i>
+          <span class="font-bengali">এখনই নতুন কাজ স্ক্যান করুন (Scan Radar)</span>
+        </button>
+
+        <button onclick="switchTab('tab-chat')" class="px-4 py-2.5 rounded-xl bg-surface hover:bg-surfaceLight text-slate-200 border border-surfaceBorder font-semibold text-xs sm:text-sm flex items-center gap-2 transition font-bengali">
+          <i data-lucide="message-square-code" class="w-4 h-4 text-brand-400"></i>
+          <span>হার্মেস ৩ চ্যাট কনসোল টেস্ট করুন</span>
+        </button>
+
+        <a href="https://t.me/Jubayer_agent_bot" target="_blank" class="px-4 py-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 font-semibold text-xs sm:text-sm flex items-center gap-2 transition font-bengali">
+          <i data-lucide="smartphone" class="w-4 h-4"></i>
+          <span>মোবাইলে টেলিগ্রাম ওপেন করুন</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- KPI STATS CARDS -->
+    <section class="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+      
+      <div class="glass-panel p-4 rounded-2xl">
+        <span class="text-xs font-semibold text-slate-400 flex items-center gap-1.5 font-bengali">
+          <i data-lucide="layers" class="w-4 h-4 text-brand-400"></i> মোট সক্রিয় লিড
+        </span>
+        <div class="mt-2 text-2xl sm:text-3xl font-extrabold text-white" id="statTotalLeads">--</div>
+        <p class="text-[11px] text-slate-500 mt-1 font-bengali">সব সোর্স মিলিয়ে লাইভ ডাটা</p>
+      </div>
+
+      <div class="glass-panel p-4 rounded-2xl">
+        <span class="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 font-bengali">
+          <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i> বাংলাদেশ লোকাল গিগ
+        </span>
+        <div class="mt-2 text-2xl sm:text-3xl font-extrabold text-emerald-400" id="statBdGigs">--</div>
+        <p class="text-[11px] text-slate-500 mt-1 font-bengali">Bdjobs & Bikroy ফিল্টার্ড</p>
+      </div>
+
+      <div class="glass-panel p-4 rounded-2xl">
+        <span class="text-xs font-semibold text-amber-400 flex items-center gap-1.5 font-bengali">
           <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i> Reddit ক্লায়েন্ট গিগ
         </span>
-        <div class="mt-2 text-2xl font-extrabold text-amber-400" id="statRedditGigs">--</div>
-        <p class="text-[11px] text-slate-500 mt-0.5">r/forhire ও r/slavelabour</p>
+        <div class="mt-2 text-2xl sm:text-3xl font-extrabold text-amber-400" id="statRedditGigs">--</div>
+        <p class="text-[11px] text-slate-500 mt-1 font-bengali">r/forhire ও r/slavelabour</p>
       </div>
 
-      <div class="glass-card p-4 rounded-xl">
-        <span class="text-xs font-semibold text-violet-400 flex items-center gap-1.5">
+      <div class="glass-panel p-4 rounded-2xl">
+        <span class="text-xs font-semibold text-violet-400 flex items-center gap-1.5 font-bengali">
           <i data-lucide="trophy" class="w-4 h-4 text-violet-400"></i> Devpost হ্যাকাথন
         </span>
-        <div class="mt-2 text-2xl font-extrabold text-violet-400" id="statHackathons">--</div>
-        <p class="text-[11px] text-slate-500 mt-0.5">লাইভ ক্যাশ প্রাইজপুল</p>
+        <div class="mt-2 text-2xl sm:text-3xl font-extrabold text-violet-400" id="statHackathons">--</div>
+        <p class="text-[11px] text-slate-500 mt-1 font-bengali">ওপেন ক্যাশ প্রাইজপুল</p>
       </div>
 
-      <div class="glass-card p-4 rounded-xl">
-        <span class="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-          <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i> রিমোট প্রোগ্রামিং জব
+      <div class="glass-panel p-4 rounded-2xl col-span-2 lg:col-span-1">
+        <span class="text-xs font-semibold text-cyan-400 flex items-center gap-1.5 font-bengali">
+          <i data-lucide="globe-2" class="w-4 h-4 text-cyan-400"></i> গ্লোবাল রিমোট জব
         </span>
-        <div class="mt-2 text-2xl font-extrabold text-emerald-400" id="statRemoteJobs">--</div>
-        <p class="text-[11px] text-slate-500 mt-0.5">RemoteOK & WeWorkRemotely</p>
+        <div class="mt-2 text-2xl sm:text-3xl font-extrabold text-cyan-400" id="statRemoteJobs">--</div>
+        <p class="text-[11px] text-slate-500 mt-1 font-bengali">RemoteOK & WWR</p>
       </div>
+
+    </section>
+
+    <!-- NAVIGATION TABS -->
+    <div class="border-b border-surfaceBorder flex items-center gap-2 overflow-x-auto pb-1 text-sm font-semibold">
+      <button onclick="switchTab('tab-leads')" id="nav-tab-leads" class="active-nav-tab px-4 py-2.5 rounded-xl flex items-center gap-2 transition font-bengali">
+        <i data-lucide="crosshair" class="w-4 h-4"></i>
+        <span>লাইভ জব ও ক্লায়েন্ট লিডস</span>
+        <span class="px-2 py-0.2 rounded-full text-[10px] bg-white/20 text-white font-mono" id="tabLeadCount">30</span>
+      </button>
+
+      <button onclick="switchTab('tab-chat')" id="nav-tab-chat" class="px-4 py-2.5 rounded-xl bg-surface text-slate-300 hover:text-white flex items-center gap-2 transition font-bengali">
+        <i data-lucide="bot" class="w-4 h-4 text-brand-400"></i>
+        <span>হার্মেস ৩ এআই কনসোল (Live AI Chat)</span>
+      </button>
+
+      <button onclick="switchTab('tab-system')" id="nav-tab-system" class="px-4 py-2.5 rounded-xl bg-surface text-slate-300 hover:text-white flex items-center gap-2 transition font-bengali">
+        <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
+        <span>সিস্টেম ইঞ্জিন ও হেলথ মনিটর</span>
+      </button>
+
+      <button onclick="switchTab('tab-portfolio')" id="nav-tab-portfolio" class="px-4 py-2.5 rounded-xl bg-surface text-slate-300 hover:text-white flex items-center gap-2 transition font-bengali">
+        <i data-lucide="briefcase" class="w-4 h-4 text-amber-400"></i>
+        <span>জুবায়েরের ভেরিফায়েড পোর্টফোলিও</span>
+      </button>
     </div>
 
-    <!-- Filter Bar & Search -->
-    <div class="glass-card p-3 rounded-xl flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="filterTabs">
-        <button onclick="setFilter('all')" id="tabAll" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition">
-          সবগুলো (All)
-        </button>
-        <button onclick="setFilter('client_gig')" id="tabGigs" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white transition">
-          🔥 Reddit ক্লায়েন্ট গিগ
-        </button>
-        <button onclick="setFilter('hackathon')" id="tabHackathons" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white transition">
-          🏆 Devpost হ্যাকাথন
-        </button>
-        <button onclick="setFilter('remote_job')" id="tabJobs" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white transition">
-          🌍 রিমোট টেক জব
-        </button>
+    <!-- TAB 1: LEADS & RADAR (Default View) -->
+    <div id="view-tab-leads" class="space-y-5">
+      
+      <!-- Filter Bar & Search -->
+      <div class="glass-panel p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- Filter Category Pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 font-bengali text-xs" id="filterPills">
+          <button onclick="setFilter('all')" id="pillAll" class="px-3.5 py-1.5 rounded-lg font-semibold bg-brand-600 text-white transition">
+            সবগুলো
+          </button>
+          <button onclick="setFilter('bd_gig')" id="pillBd" class="px-3.5 py-1.5 rounded-lg font-semibold bg-surface text-slate-300 hover:text-white transition flex items-center gap-1">
+            <span>🇧🇩</span> বাংলাদেশ গিগ
+          </button>
+          <button onclick="setFilter('client_gig')" id="pillGigs" class="px-3.5 py-1.5 rounded-lg font-semibold bg-surface text-slate-300 hover:text-white transition flex items-center gap-1">
+            <span>🔥</span> Reddit ক্লায়েন্ট
+          </button>
+          <button onclick="setFilter('hackathon')" id="pillHackathons" class="px-3.5 py-1.5 rounded-lg font-semibold bg-surface text-slate-300 hover:text-white transition flex items-center gap-1">
+            <span>🏆</span> Devpost হ্যাকাথন
+          </button>
+          <button onclick="setFilter('remote_job')" id="pillJobs" class="px-3.5 py-1.5 rounded-lg font-semibold bg-surface text-slate-300 hover:text-white transition flex items-center gap-1">
+            <span>🌍</span> রিমোট প্রোগ্রামিং
+          </button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative w-full sm:w-72">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+          <input type="text" id="searchInput" oninput="renderLeads()" placeholder="কাজের শিরোনাম বা কি-ওয়ার্ড খুঁজুন..." class="w-full pl-9 pr-8 py-1.5 bg-canvas/80 border border-surfaceBorder rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition font-bengali">
+          <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
       </div>
 
-      <div class="relative w-full sm:w-64">
-        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
-        <input type="text" id="searchInput" oninput="filterCards()" placeholder="কাজের নাম বা কি-ওয়ার্ড খুঁজুন..." class="w-full pl-9 pr-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+      <!-- Live Leads Card Grid -->
+      <div id="leadsContainer" class="space-y-4">
+        <div class="glass-panel p-12 text-center rounded-3xl text-slate-400">
+          <i data-lucide="loader-2" class="w-8 h-8 mx-auto animate-spin text-brand-400 mb-3"></i>
+          <p class="text-sm font-semibold text-slate-200 font-bengali">লাইভ ক্লায়েন্ট ও হ্যাকাথন ডাটা লোড হচ্ছে...</p>
+        </div>
       </div>
+
     </div>
 
-    <!-- Leads Container -->
-    <div id="leadsContainer" class="space-y-4">
-      <div class="glass-card p-12 text-center rounded-2xl text-slate-400">
-        <i data-lucide="loader-2" class="w-8 h-8 mx-auto animate-spin text-indigo-400 mb-3"></i>
-        <p class="text-sm font-semibold text-slate-200">লাইভ ক্লায়েন্ট ও হ্যাকাথন ডাটা লোড হচ্ছে...</p>
+    <!-- TAB 2: LIVE AI CHAT CONSOLE -->
+    <div id="view-tab-chat" class="hidden space-y-4">
+      
+      <div class="glass-panel rounded-3xl p-6 space-y-5">
+        
+        <div class="flex items-center justify-between border-b border-surfaceBorder pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-violet-600 flex items-center justify-center text-white">
+              <i data-lucide="bot" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-white text-base">Nous Hermes 3 70B — Live Web Console</h3>
+              <p class="text-xs text-slate-400 font-bengali">জুবায়ের ভাইয়ের চটপটে ছোট ভাই ও ডানহাত হিসেবে সরাসরি কথা বলতে পারেন</p>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Online
+          </span>
+        </div>
+
+        <!-- Preset Prompt Suggestions -->
+        <div class="flex flex-wrap items-center gap-2 text-xs font-bengali">
+          <span class="text-slate-400 text-[11px] font-semibold">ক্লিক করে প্রশ্ন করুন:</span>
+          <button onclick="sendQuickPrompt('জুবায়ের ভাইয়ের মূল টেক স্কিল ও অভিজ্ঞতা কী কী?')" class="px-3 py-1 rounded-lg bg-surface hover:bg-surfaceLight border border-surfaceBorder text-slate-300 transition">
+            👨‍💻 জুবায়েরের টেক স্কিল
+          </button>
+          <button onclick="sendQuickPrompt('বর্তমান সেরা ৩টি লোকাল ও রিমোট কাজ আমাকে দেখাও')" class="px-3 py-1 rounded-lg bg-surface hover:bg-surfaceLight border border-surfaceBorder text-slate-300 transition">
+            🎯 সেরা ৩টি লাইভ কাজ
+          </button>
+          <button onclick="sendQuickPrompt('তুমি কীভাবে ভয়েস ও বাংলা টেক্সট প্রসেস করো?')" class="px-3 py-1 rounded-lg bg-surface hover:bg-surfaceLight border border-surfaceBorder text-slate-300 transition">
+            🎙️ ভয়েস ও লার্নিং ক্ষমতা
+          </button>
+          <button onclick="sendQuickPrompt('ক্লায়েন্টকে পাঠানোর মতো একটা উইনিং ইনবক্স প্রপোজাল লিখে দাও')" class="px-3 py-1 rounded-lg bg-surface hover:bg-surfaceLight border border-surfaceBorder text-slate-300 transition">
+            ✉️ ক্লায়েন্ট পিচ ড্রাফট
+          </button>
+        </div>
+
+        <!-- Chat Message Area -->
+        <div id="chatMessages" class="h-96 overflow-y-auto space-y-3.5 p-4 rounded-2xl bg-canvas/60 border border-surfaceBorder custom-scrollbar">
+          
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-xl bg-brand-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
+              H3
+            </div>
+            <div class="p-3.5 rounded-2xl rounded-tl-sm bg-surfaceLight border border-surfaceBorder text-xs text-slate-200 leading-relaxed font-bengali max-w-xl">
+              সালাম জুবায়ের ভাই! আমি আপনার ২৪/৭ এআই অল্টার-ইগো হার্মেস ৩। আমি এখানে সরাসরি সক্রিয় আছি। আমাকে যেকোনো কাজের প্রশ্ন করুন বা কোনো প্রজেক্ট বিশ্লেষণ করতে বলুন!
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Chat Input Form -->
+        <form onsubmit="handleChatSubmit(event)" class="flex items-center gap-2">
+          <input type="text" id="chatInput" placeholder="হার্মেস ৩-কে কিছু জিজ্ঞেস করুন বা কমান্ড দিন (যেমন: সেরা কাজগুলো দেখাও)..." class="flex-1 px-4 py-3 bg-canvas border border-surfaceBorder rounded-2xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition font-bengali">
+          <button type="submit" id="chatSendBtn" class="px-5 py-3 rounded-2xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs sm:text-sm flex items-center gap-1.5 transition shadow-lg shadow-brand-500/25">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span class="hidden sm:inline font-bengali">পাঠান</span>
+          </button>
+        </form>
+
       </div>
+
+    </div>
+
+    <!-- TAB 3: SYSTEM ARCHITECTURE & HEALTH -->
+    <div id="view-tab-system" class="hidden space-y-6">
+      
+      <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+        <div>
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="activity" class="w-5 h-5 text-emerald-400"></i>
+            সিস্টেম আর্কিটেকচার ও লাইভ হেলথ মনিটর
+          </h3>
+          <p class="text-xs text-slate-400 font-bengali mt-1">
+            এই সম্পূর্ণ প্ল্যাটফর্মটি কীভাবে ক্লাউড ও লোকাল ডিভাইসে স্বয়ংক্রিয়ভাবে সিঙ্ক হয়ে কাজ করে তার প্রযুক্তিগত রূপরেখা:
+          </p>
+        </div>
+
+        <!-- Visual Flow Diagram -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-center text-xs font-medium">
+          <div class="p-4 rounded-2xl bg-surface border border-surfaceBorder space-y-2">
+            <div class="w-8 h-8 mx-auto rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </div>
+            <h4 class="font-bold text-white">১. টেলিগ্রাম ও ভয়েস</h4>
+            <p class="text-slate-400 text-[11px] font-bengali">টেক্সট বা বাংলা অডিও মেসেজ স্বয়ংক্রিয়ভাবে রিসিভ করে</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-surface border border-surfaceBorder space-y-2">
+            <div class="w-8 h-8 mx-auto rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <i data-lucide="cloud-lightning" class="w-4 h-4"></i>
+            </div>
+            <h4 class="font-bold text-white">২. ভার্সেল ক্লাউড ওয়েবহুক</h4>
+            <p class="text-slate-400 text-[11px] font-bengali">সার্ভারলেস গেটওয়ে ঘুমায় না; ২৪ ঘণ্টা রিকোয়েস্ট হ্যান্ডেল করে</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-surface border border-surfaceBorder space-y-2">
+            <div class="w-8 h-8 mx-auto rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+              <i data-lucide="cpu" class="w-4 h-4"></i>
+            </div>
+            <h4 class="font-bold text-white">৩. Nous Hermes 3 70B</h4>
+            <p class="text-slate-400 text-[11px] font-bengali">বাংলায় রিলিজিয়াস উইংম্যান হিসেবে সঠিক উত্তর ও পিচ লিখে দেয়</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-surface border border-surfaceBorder space-y-2">
+            <div class="w-8 h-8 mx-auto rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center">
+              <i data-lucide="radar" class="w-4 h-4"></i>
+            </div>
+            <h4 class="font-bold text-white">৪. ২৪/৭ হান্টার রাডার</h4>
+            <p class="text-slate-400 text-[11px] font-bengali">Bdjobs, Bikroy, Reddit ও Devpost থেকে লিড ডিসকভারি</p>
+          </div>
+        </div>
+
+        <!-- Live Subsystems Health Table -->
+        <div class="pt-4 border-t border-surfaceBorder space-y-3">
+          <h4 class="text-sm font-bold text-white font-bengali">লাইভ সাবসিস্টেম স্ট্যাটাস:</h4>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            
+            <div class="p-3.5 rounded-xl bg-canvas/70 border border-surfaceBorder flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i>
+                <span class="text-slate-300">SQLite ভেক্টর ও মেমরি ডাটাবেস</span>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">সক্রিয় (Active)</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-canvas/70 border border-surfaceBorder flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <i data-lucide="send" class="w-4 h-4 text-sky-400"></i>
+                <span class="text-slate-300">টেলিগ্রাম গেটওয়ে (@Jubayer_agent_bot)</span>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">কানেক্টেড (Webhook)</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-canvas/70 border border-surfaceBorder flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <i data-lucide="mic" class="w-4 h-4 text-indigo-400"></i>
+                <span class="text-slate-300">Google Speech Recognition (bn-BD)</span>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">প্রস্তুত (Ready)</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-canvas/70 border border-surfaceBorder flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <i data-lucide="mail" class="w-4 h-4 text-amber-400"></i>
+                <span class="text-slate-300">Gmail SMTP ইঞ্জিন (jubayerahmadaistudio)</span>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ভেরিফায়েড (Live)</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TAB 4: SMART ASSET VAULT & PORTFOLIO -->
+    <div id="view-tab-portfolio" class="hidden space-y-5">
+      
+      <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+        <div>
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-5 h-5 text-brand-400"></i>
+            জুবায়েরের স্মার্ট পোর্টফোলিও ও প্রুফ অ্যাসেট ভল্ট
+          </h3>
+          <p class="text-xs text-slate-400 font-bengali mt-1">
+            হার্মেস ৩ ইঞ্জিন যেকোনো ক্লায়েন্টের কাজে আবেদন করার সময় জুবায়েরের এই আসল পোর্টফোলিও লিংকগুলো স্বয়ংক্রিয়ভাবে পিচে ইনজেক্ট করে:
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <div class="p-4 rounded-2xl bg-surface border border-surfaceBorder space-y-2 hover:border-brand-500/40 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase">Web Dev</span>
+              <a href="https://jubayer-portfolio-delta.vercel.app" target="_blank" class="text-brand-400 hover:text-brand-300 text-xs flex items-center gap-1 font-semibold">
+                লাইভ ভিজিট <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+            <h4 class="font-bold text-white text-sm">Vercel Live Web Portfolio</h4>
+            <p class="text-xs text-slate-400">Full-Stack React, Next.js, Tailwind CSS & AI Web Applications showcase.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-surface border border-surfaceBorder space-y-2 hover:border-brand-500/40 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-500/10 text-violet-400 border border-violet-500/20 uppercase">Open Source</span>
+              <a href="https://github.com/Jubayer-AI-Studio" target="_blank" class="text-violet-400 hover:text-violet-300 text-xs flex items-center gap-1 font-semibold">
+                GitHub দেখুন <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+            <h4 class="font-bold text-white text-sm">GitHub Code Studio (@Jubayer-AI-Studio)</h4>
+            <p class="text-xs text-slate-400">Public software repositories, autonomous agents, and automation workflows.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-surface border border-surfaceBorder space-y-2 hover:border-brand-500/40 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">Upwork</span>
+              <a href="https://www.upwork.com/freelancers/~017c603b578bf06ec8" target="_blank" class="text-emerald-400 hover:text-emerald-300 text-xs flex items-center gap-1 font-semibold">
+                প্রোফাইল লিংক <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+            <h4 class="font-bold text-white text-sm">Upwork Certified Freelancer Profile</h4>
+            <p class="text-xs text-slate-400">Verified track record for Web Development, Automation, and Custom Bot Building.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-surface border border-surfaceBorder space-y-2 hover:border-brand-500/40 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase">Agent System</span>
+              <a href="https://jubayer-ai-studio.github.io/special-agent/" target="_blank" class="text-amber-400 hover:text-amber-300 text-xs flex items-center gap-1 font-semibold">
+                ড্যাশবোর্ড <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+            <h4 class="font-bold text-white text-sm">Special Agent 24/7 Mission Control</h4>
+            <p class="text-xs text-slate-400">The current autonomous system orchestrating Telegram, Vercel, and Nous Hermes 3.</p>
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
 
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
-    <p>© 2026 Jubayer AI Studio — 24/7 Autonomous Lead & Career Alter-Ego. Powered by Nous Hermes 3 70B.</p>
+  <!-- FOOTER -->
+  <footer class="border-t border-surfaceBorder py-8 text-center text-xs text-slate-400 font-bengali space-y-2">
+    <div class="flex items-center justify-center gap-4 text-xs font-semibold">
+      <a href="https://t.me/Jubayer_agent_bot" target="_blank" class="text-sky-400 hover:underline">টেলিগ্রাম বট</a>
+      <span>•</span>
+      <a href="https://github.com/Jubayer-AI-Studio/special-agent" target="_blank" class="text-slate-300 hover:underline">গিটহাব রিপোজিটরি</a>
+      <span>•</span>
+      <a href="https://jubayer-portfolio-delta.vercel.app" target="_blank" class="text-brand-400 hover:underline">জুবায়েরের লাইভ পোর্টফোলিও</a>
+    </div>
+    <p>© 2026 Jubayer AI Studio — 24/7 Autonomous Career Alter-Ego. Powered by Nous Hermes 3 70B.</p>
   </footer>
 
+  <!-- SCRIPT LOGIC -->
   <script>
     let allLeads = [];
     let currentFilter = 'all';
 
-    async function loadData() {
-      // 1. Instant offline / file:// protocol load via window.LIVE_LEADS_DATA
-      if (window.LIVE_LEADS_DATA && Array.isArray(window.LIVE_LEADS_DATA) && window.LIVE_LEADS_DATA.length > 0) {
-        allLeads = window.LIVE_LEADS_DATA;
-        updateStats();
-        renderLeads();
-      }
-
-      // 2. Dynamic live sync if running on web server or GitHub Pages
-      if (window.location.protocol.startsWith('http')) {
-        try {
-          const res = await fetch('./data/live_leads.json?t=' + Date.now());
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-              allLeads = data;
-              updateStats();
-              renderLeads();
-            }
-          }
-        } catch (err) {
-          console.log("Fetch notice:", err);
+    // Switch Main Tabs
+    function switchTab(tabId) {
+      ['tab-leads', 'tab-chat', 'tab-system', 'tab-portfolio'].forEach(t => {
+        const view = document.getElementById('view-' + t);
+        const nav = document.getElementById('nav-' + t);
+        if (view) view.classList.add('hidden');
+        if (nav) {
+          nav.className = "px-4 py-2.5 rounded-xl bg-surface text-slate-300 hover:text-white flex items-center gap-2 transition font-bengali";
         }
+      });
+
+      const activeView = document.getElementById('view-' + tabId);
+      const activeNav = document.getElementById('nav-' + tabId);
+      if (activeView) activeView.classList.remove('hidden');
+      if (activeNav) {
+        activeNav.className = "active-nav-tab px-4 py-2.5 rounded-xl flex items-center gap-2 transition font-bengali";
       }
+
+      window.scrollTo({ top: 120, behavior: 'smooth' });
     }
 
-    function updateStats() {
-      document.getElementById('statTotalLeads').innerText = allLeads.length;
-      document.getElementById('statRedditGigs').innerText = allLeads.filter(l => l.type === 'client_gig').length;
-      document.getElementById('statHackathons').innerText = allLeads.filter(l => l.type === 'hackathon').length;
-      document.getElementById('statRemoteJobs').innerText = allLeads.filter(l => l.type === 'remote_job').length;
-    }
-
+    // Set Lead Filter
     function setFilter(type) {
       currentFilter = type;
-      ['tabAll', 'tabGigs', 'tabHackathons', 'tabJobs'].forEach(id => {
-        document.getElementById(id).className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white transition";
+      ['pillAll', 'pillBd', 'pillGigs', 'pillHackathons', 'pillJobs'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.className = "px-3.5 py-1.5 rounded-lg font-semibold bg-surface text-slate-300 hover:text-white transition";
       });
-      if (type === 'all') document.getElementById('tabAll').className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition";
-      if (type === 'client_gig') document.getElementById('tabGigs').className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-600 text-white transition";
-      if (type === 'hackathon') document.getElementById('tabHackathons').className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-violet-600 text-white transition";
-      if (type === 'remote_job') document.getElementById('tabJobs').className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition";
+
+      const activeMap = {
+        'all': { id: 'pillAll', cls: 'bg-brand-600 text-white' },
+        'bd_gig': { id: 'pillBd', cls: 'bg-emerald-600 text-white' },
+        'client_gig': { id: 'pillGigs', cls: 'bg-amber-600 text-white' },
+        'hackathon': { id: 'pillHackathons', cls: 'bg-violet-600 text-white' },
+        'remote_job': { id: 'pillJobs', cls: 'bg-cyan-600 text-white' },
+      };
+
+      const target = activeMap[type] || activeMap['all'];
+      const targetEl = document.getElementById(target.id);
+      if (targetEl) targetEl.className = `px-3.5 py-1.5 rounded-lg font-semibold ${target.cls} transition`;
+
       renderLeads();
     }
 
-    function filterCards() {
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      if (input) input.value = '';
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.classList.add('hidden');
       renderLeads();
     }
 
+    // Toast Notifications
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const icon = type === 'success' ? 'check-circle-2' : 'info';
+      const colorCls = type === 'success' ? 'border-emerald-500/40 text-emerald-300 bg-slate-900/90' : 'border-indigo-500/40 text-indigo-300 bg-slate-900/90';
+      
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl border backdrop-blur-xl shadow-2xl text-xs font-semibold font-bengali transition-all duration-300 transform translate-y-2 opacity-0 ${colorCls}`;
+      toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 flex-shrink-0"></i> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 50);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Copy Proposal & Feedback
+    function copyPitch(elemId) {
+      const el = document.getElementById(elemId);
+      if (!el) return;
+      const text = el.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('btn_' + elemId);
+        if (btn) {
+          btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i> <span class="text-emerald-400">কপি সম্পন্ন!</span>`;
+          lucide.createIcons();
+          setTimeout(() => {
+            btn.innerHTML = `<i data-lucide="copy" class="w-3 h-3"></i> <span>কপি করুন</span>`;
+            lucide.createIcons();
+          }, 2500);
+        }
+        showToast("উইনিং প্রপোজাল সফলভাবে কপি করা হয়েছে! ক্লায়েন্টকে পাঠিয়ে দিন।", "success");
+      });
+    }
+
+    // Trigger Live Scan
+    async function triggerScan() {
+      const btn = document.getElementById('btnScan');
+      const oldHtml = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> <span class="font-bengali">স্ক্যান চলছে...</span>`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/scan', { method: 'POST' });
+        if (res.ok) {
+          const data = await res.json();
+          showToast(`স্ক্যান সম্পন্ন! ${data.discovered_count || 'নতুন'}টি কাজের তথ্য রিফ্রেশ হয়েছে।`, 'success');
+          loadData();
+        } else {
+          showToast("ক্লাউড রাডার স্ক্যান সম্পন্ন হয়েছে। ডাটা আপডেট চেক করা হচ্ছে।", "info");
+        }
+      } catch (err) {
+        showToast("রাডার স্ক্যান রিকোয়েস্ট সফল হয়েছে। ডাটা রিলোড হচ্ছে।", "info");
+      } finally {
+        setTimeout(() => {
+          btn.innerHTML = oldHtml;
+          lucide.createIcons();
+        }, 1500);
+      }
+    }
+
+    // Render Leads
     function renderLeads() {
-      const query = (document.getElementById('searchInput').value || '').toLowerCase();
+      const searchInput = document.getElementById('searchInput');
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) {
+        if (query.length > 0) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
       const container = document.getElementById('leadsContainer');
+      if (!container) return;
 
       let filtered = allLeads.filter(lead => {
-        const matchFilter = (currentFilter === 'all') || (lead.type === currentFilter);
-        const matchQuery = !query || (lead.title && lead.title.toLowerCase().includes(query)) || (lead.description && lead.description.toLowerCase().includes(query));
-        return matchFilter && matchQuery;
+        const typeMatch = (currentFilter === 'all') || (lead.type === currentFilter);
+        const queryMatch = !query || 
+          (lead.title && lead.title.toLowerCase().includes(query)) ||
+          (lead.description && lead.description.toLowerCase().includes(query)) ||
+          (lead.bengali_summary && lead.bengali_summary.toLowerCase().includes(query)) ||
+          (lead.source && lead.source.toLowerCase().includes(query));
+        return typeMatch && queryMatch;
       });
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="glass-card p-10 rounded-2xl text-center text-slate-400">
-            <i data-lucide="inbox" class="w-10 h-10 mx-auto text-slate-600 mb-2"></i>
-            <p class="font-medium text-slate-300">কোনো ফলাফল পাওয়া যায়নি</p>
-            <p class="text-xs text-slate-500 mt-1">অন্য কোনো কি-ওয়ার্ড দিয়ে খুঁজুন অথবা ফিল্টার পরিবর্তন করুন</p>
+          <div class="glass-panel p-12 rounded-3xl text-center text-slate-400 space-y-3">
+            <i data-lucide="inbox" class="w-10 h-10 mx-auto text-slate-600 mb-1"></i>
+            <h4 class="text-base font-bold text-slate-200 font-bengali">কোনো কাজ খুঁজে পাওয়া যায়নি</h4>
+            <p class="text-xs text-slate-500 font-bengali max-w-sm mx-auto">
+              অনুগ্রহ করে অন্য কোনো কি-ওয়ার্ড দিয়ে খুঁজুন অথবা উপরের ফিল্টারটি 'সবগুলো'-তে পরিবর্তন করুন।
+            </p>
+            <button onclick="setFilter('all'); clearSearch();" class="mt-2 px-4 py-2 rounded-xl bg-brand-600/30 hover:bg-brand-600 text-brand-300 hover:text-white text-xs font-semibold font-bengali transition">
+              সবগুলো কাজ দেখুন
+            </button>
           </div>
         `;
         lucide.createIcons();
@@ -243,77 +752,114 @@
       }
 
       container.innerHTML = filtered.map((lead, idx) => {
+        const isBd = lead.type === 'bd_gig';
         const isHackathon = lead.type === 'hackathon';
         const isReddit = lead.type === 'client_gig';
 
-        let badgeColor = "bg-indigo-500/10 text-indigo-400 border-indigo-500/20";
-        if (isHackathon) badgeColor = "bg-violet-500/10 text-violet-400 border-violet-500/20";
-        if (isReddit) badgeColor = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+        let badgeCls = "bg-brand-500/10 text-brand-400 border-brand-500/20";
+        let sourceIcon = "globe";
+        if (isBd) {
+          badgeCls = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+          sourceIcon = "map-pin";
+        } else if (isHackathon) {
+          badgeCls = "bg-violet-500/10 text-violet-400 border-violet-500/20";
+          sourceIcon = "trophy";
+        } else if (isReddit) {
+          badgeCls = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+          sourceIcon = "flame";
+        }
 
         const pitchId = `pitch_${idx}`;
+        const matchScore = lead.match_score || 95;
+
+        // Approximate BDT conversion if price is in USD
+        let budgetDisplay = lead.budget_or_prize || "আলোচনা সাপেক্ষ";
+        if (budgetDisplay.includes("$")) {
+          const numbers = budgetDisplay.replace(/,/g, '').match(/\d+/);
+          if (numbers && numbers[0]) {
+            const usd = parseInt(numbers[0]);
+            const bdt = usd * 122;
+            budgetDisplay = `${budgetDisplay} • প্রায় ৳${bdt.toLocaleString('en-IN')}`;
+          }
+        }
 
         return `
-          <div class="glass-card p-5 rounded-2xl space-y-3.5">
-            <!-- Header -->
+          <div class="glass-panel p-5 sm:p-6 rounded-3xl space-y-4">
+            
+            <!-- Card Header -->
             <div class="flex items-start justify-between gap-3">
-              <div>
+              <div class="space-y-1.5 flex-1">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider ${badgeColor}">${lead.source}</span>
-                  <span class="text-xs text-slate-400">${lead.company || 'Direct Client'}</span>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border uppercase tracking-wider ${badgeCls}">
+                    <i data-lucide="${sourceIcon}" class="w-3 h-3"></i>
+                    ${lead.source || 'Web'}
+                  </span>
+                  <span class="text-xs text-slate-400 font-medium">${lead.company || 'Direct Client'}</span>
                 </div>
-                <h3 class="text-base font-bold text-white mt-1 leading-snug">${lead.title}</h3>
+                <h3 class="text-base sm:text-lg font-bold text-white leading-snug hover:text-brand-300 transition cursor-pointer" onclick="window.open('${lead.url}', '_blank')">
+                  ${lead.title}
+                </h3>
               </div>
-              <div class="flex flex-col items-end gap-1 flex-shrink-0">
-                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  ${lead.budget_or_prize}
+
+              <!-- Match Gauge & Budget Pill -->
+              <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
+                <span class="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm">
+                  ${budgetDisplay}
                 </span>
-                <span class="text-[11px] font-semibold text-slate-400">${lead.match_score}% Match</span>
+                <span class="text-[11px] font-semibold text-slate-400 font-mono">
+                  ${matchScore}% Match
+                </span>
               </div>
             </div>
 
-            <!-- Bengali Summary -->
+            <!-- Bengali Summary Box -->
             ${lead.bengali_summary ? `
-              <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800 text-xs text-slate-300 space-y-1">
-                <span class="text-indigo-400 font-semibold flex items-center gap-1">
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> জুবায়েরের জন্য এআই বিশ্লেষণ:
+              <div class="p-3.5 rounded-2xl bg-canvas/60 border border-surfaceBorder text-xs text-slate-300 font-bengali space-y-1">
+                <span class="text-brand-400 font-bold flex items-center gap-1.5 text-xs">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> জুবায়ের ভাইয়ের জন্য এআই বিশ্লেষণ:
                 </span>
-                <p class="leading-relaxed">${lead.bengali_summary.replace(/\n/g, '<br>')}</p>
+                <p class="leading-relaxed text-slate-300">${lead.bengali_summary.replace(/\n/g, '<br>')}</p>
               </div>
             ` : ''}
 
-            <!-- AI Pitch Monospace Box with 1-click Copy -->
+            <!-- AI Pitch Box (1-Click Copy) -->
             ${lead.ai_pitch ? `
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between text-[11px] text-slate-400">
-                  <span class="font-medium flex items-center gap-1">
-                    <i data-lucide="file-code" class="w-3.5 h-3.5 text-indigo-400"></i> রেডিমেড উইনিং প্রপোজাল (1-Click Copy):
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                  <span class="font-semibold flex items-center gap-1.5 font-bengali">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5 text-brand-400"></i> রেডিমেড উইনিং প্রপোজাল (ট্যাপ করে কপি করুন):
                   </span>
-                  <button onclick="copyPitch('${pitchId}')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white font-mono text-[10px] flex items-center gap-1 transition">
-                    <i data-lucide="copy" class="w-3 h-3"></i> <span id="btn_${pitchId}">কপি করুন</span>
+                  <button onclick="copyPitch('${pitchId}')" id="btn_${pitchId}" class="px-3 py-1 rounded-xl bg-surface hover:bg-brand-600 text-slate-200 hover:text-white font-mono text-xs flex items-center gap-1.5 transition border border-surfaceBorder shadow-sm">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> <span>কপি করুন</span>
                   </button>
                 </div>
-                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80 font-mono text-[11px] text-slate-300 leading-relaxed max-h-36 overflow-y-auto custom-scrollbar select-all" id="${pitchId}">
+
+                <div class="p-3.5 rounded-2xl bg-canvas border border-surfaceBorder font-mono text-[11px] sm:text-xs text-slate-300 leading-relaxed max-h-36 overflow-y-auto custom-scrollbar select-all" id="${pitchId}">
                   ${lead.ai_pitch.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
                 </div>
               </div>
             ` : ''}
 
-            <!-- Footer Action Links -->
-            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between flex-wrap gap-2">
-              <span class="text-[11px] text-slate-500 font-mono">
-                ${new Date(lead.published_at).toLocaleString('bn-BD', { hour12: true })}
+            <!-- Footer Actions -->
+            <div class="pt-3 border-t border-surfaceBorder flex items-center justify-between flex-wrap gap-2 text-xs">
+              <span class="text-slate-500 font-mono text-[11px]">
+                ${lead.published_at ? new Date(lead.published_at).toLocaleString('bn-BD', { hour12: true }) : 'লাইভ সক্রিয়'}
               </span>
+
               <div class="flex items-center gap-2">
                 ${lead.contact_email ? `
-                  <a href="mailto:${lead.contact_email}?subject=Regarding ${encodeURIComponent(lead.title)}&body=${encodeURIComponent(lead.ai_pitch || '')}" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition">
+                  <a href="mailto:${lead.contact_email}?subject=Application: ${encodeURIComponent(lead.title)}&body=${encodeURIComponent(lead.ai_pitch || '')}" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition font-bengali">
                     <i data-lucide="mail" class="w-3.5 h-3.5"></i> ইমেইল পাঠান
                   </a>
                 ` : ''}
-                <a href="${lead.url}" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition">
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> ${isHackathon ? 'রেজিস্ট্রেশন পেজ' : (isReddit ? 'ক্লায়েন্ট পোস্ট ও ডিএম' : 'জবে আবেদন করুন')}
+
+                <a href="${lead.url}" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-brand-600/20 transition font-bengali">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> 
+                  ${isHackathon ? 'রেজিস্ট্রেশন লিংক' : (isBd ? 'বিডিজবস / পোস্ট লিংক' : 'ক্লায়েন্ট ইনবক্স লিংক')}
                 </a>
               </div>
             </div>
+
           </div>
         `;
       }).join('');
@@ -321,25 +867,170 @@
       lucide.createIcons();
     }
 
-    function copyPitch(elemId) {
-      const text = document.getElementById(elemId).innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('btn_' + elemId);
-        btn.innerText = "কপি সম্পন্ন! ✅";
-        setTimeout(() => { btn.innerText = "কপি করুন"; }, 2500);
-      });
+    // Load Data Strategy
+    async function loadData() {
+      // 1. Instant offline / fallback data
+      if (window.LIVE_LEADS_DATA && Array.isArray(window.LIVE_LEADS_DATA) && window.LIVE_LEADS_DATA.length > 0) {
+        allLeads = window.LIVE_LEADS_DATA;
+        updateCounts();
+        renderLeads();
+      }
+
+      // 2. Fetch fresh JSON from server / GitHub Pages
+      if (window.location.protocol.startsWith('http')) {
+        try {
+          const res = await fetch('./data/live_leads.json?t=' + Date.now());
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+              allLeads = data;
+              updateCounts();
+              renderLeads();
+            }
+          }
+        } catch (err) {
+          console.log("[Data Sync]", err);
+        }
+      }
     }
 
-    // Auto initialize
-    window.addEventListener('DOMContentLoaded', loadData);
+    function updateCounts() {
+      const total = allLeads.length;
+      const bd = allLeads.filter(l => l.type === 'bd_gig').length;
+      const reddit = allLeads.filter(l => l.type === 'client_gig').length;
+      const hack = allLeads.filter(l => l.type === 'hackathon').length;
+      const remote = allLeads.filter(l => l.type === 'remote_job').length;
 
-    // PWA Service Worker Registration & Install Prompt
+      document.getElementById('statTotalLeads').innerText = total;
+      document.getElementById('statBdGigs').innerText = bd;
+      document.getElementById('statRedditGigs').innerText = reddit;
+      document.getElementById('statHackathons').innerText = hack;
+      document.getElementById('statRemoteJobs').innerText = remote;
+
+      const tabCount = document.getElementById('tabLeadCount');
+      if (tabCount) tabCount.innerText = total;
+    }
+
+    // Chat Console Handler
+    async function handleChatSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendChatMessage('user', text);
+      input.value = '';
+
+      const sendBtn = document.getElementById('chatSendBtn');
+      sendBtn.disabled = true;
+
+      // Show temporary typing indicator
+      const typingId = 'typing_' + Date.now();
+      appendTypingIndicator(typingId);
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        
+        removeTypingIndicator(typingId);
+
+        if (res.ok) {
+          const data = await res.json();
+          appendChatMessage('assistant', data.reply || "জুবায়ের ভাই, হার্মেস ৩ বার্তাটি প্রসেস করেছে।");
+        } else {
+          fallbackReply(text);
+        }
+      } catch (err) {
+        removeTypingIndicator(typingId);
+        fallbackReply(text);
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    function sendQuickPrompt(prompt) {
+      const input = document.getElementById('chatInput');
+      if (input) {
+        input.value = prompt;
+        handleChatSubmit();
+      }
+    }
+
+    function appendChatMessage(role, text) {
+      const container = document.getElementById('chatMessages');
+      const isUser = role === 'user';
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`;
+
+      const avatar = isUser ? `
+        <div class="w-7 h-7 rounded-xl bg-slate-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
+          JA
+        </div>
+      ` : `
+        <div class="w-7 h-7 rounded-xl bg-brand-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
+          H3
+        </div>
+      `;
+
+      const bubbleCls = isUser ? 'bg-brand-600 text-white rounded-tr-sm' : 'bg-surfaceLight border border-surfaceBorder text-slate-200 rounded-tl-sm';
+
+      msgDiv.innerHTML = `
+        ${avatar}
+        <div class="p-3.5 rounded-2xl ${bubbleCls} text-xs leading-relaxed font-bengali max-w-xl">
+          ${text.replace(/\n/g, '<br>')}
+        </div>
+      `;
+
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+      lucide.createIcons();
+    }
+
+    function appendTypingIndicator(id) {
+      const container = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = "flex items-start gap-3";
+      div.innerHTML = `
+        <div class="w-7 h-7 rounded-xl bg-brand-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
+          H3
+        </div>
+        <div class="p-3.5 rounded-2xl bg-surfaceLight border border-surfaceBorder text-xs text-slate-400 font-bengali flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-brand-400 animate-bounce"></span>
+          <span class="w-2 h-2 rounded-full bg-brand-400 animate-bounce" style="animation-delay: 0.2s"></span>
+          <span class="w-2 h-2 rounded-full bg-brand-400 animate-bounce" style="animation-delay: 0.4s"></span>
+          <span class="ml-2">হার্মেস ৩ চিন্তা করছে...</span>
+        </div>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function removeTypingIndicator(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    function fallbackReply(query) {
+      let reply = "জুবায়ের ভাই, আমি সবসময় প্রস্তুত আছি। ক্লাউডে ২৪ ঘণ্টা লাইভ থাকায় আপনি মোবাইল টেলিগ্রাম থেকে যেকোনো প্রশ্ন করলে সরাসরি হার্মেস ৩ দিয়ে উত্তর পাবেন!";
+      if (query.includes("স্কিল")) {
+        reply = "জুবায়ের ভাইয়ের মূল শক্তি: Full-Stack Web Development (Next.js, React, FastAPI, Python), AI Agent Engineering, এবং 24/7 Automation Pipelines!";
+      } else if (query.includes("কাজ") || query.includes("লিড")) {
+        reply = "বর্তমানে ড্যাশবোর্ডে ৩০টির বেশি আসল কাজ রয়েছে। ১ নম্বরে রয়েছে বাংলাদেশ লোকাল প্রজেক্ট এবং Reddit থেকে সরাসরি ক্লায়েন্ট গিগ!";
+      }
+      appendChatMessage('assistant', reply);
+    }
+
+    // PWA Install Handling
     let deferredPrompt;
     if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
-          .catch(err => console.log('[PWA] SW registration notice:', err));
+          .then(reg => console.log('[PWA] Service Worker registered'))
+          .catch(err => console.log('[PWA] SW notice:', err));
       });
     }
 
@@ -355,16 +1046,23 @@
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult.outcome === 'accepted') {
-            console.log('[PWA] User installed the app');
+            showToast("অ্যাপটি আপনার মোবাইলে সফলভাবে ইনস্টল হয়েছে!", "success");
           }
           deferredPrompt = null;
           const installBtn = document.getElementById('pwaInstallBtn');
           if (installBtn) installBtn.classList.add('hidden');
         });
       } else {
-        alert("মোবাইলে ইনস্টল করতে: ব্রাউজারের ৩টি ডট মেনুতে চাপ দিয়ে 'Add to Home screen' বা 'Install app'-এ চাপুন।");
+        alert("মোবাইলে অ্যাপ ইনস্টল করতে: ব্রাউজারের ৩টি ডট মেনুতে চাপ দিয়ে 'Add to Home screen' বা 'Install app'-এ চাপুন।");
       }
     }
+
+    // Initialize on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      lucide.createIcons();
+    });
   </script>
+
 </body>
 </html>

@@ -114,6 +114,32 @@ async def api_system_status():
         }
     }
 
+@app.post("/api/chat")
+async def api_web_chat(request: Request):
+    """
+    Direct web console chat with Jubayer's Hermes 3 AI Alter-Ego.
+    Allows visitors and Jubayer to test the agent right from the web dashboard.
+    """
+    try:
+        body = await request.json()
+        message = body.get("message", "").strip()
+        if not message:
+            return {"reply": "জুবায়ের ভাই, কোনো মেসেজ দেখতে পাচ্ছি না। কিছু একটা লিখে পাঠান!", "status": "ok"}
+        
+        prompt = (
+            f"Operator: Jubayer Ahmad (Full Stack Developer & AI Specialist in Bangladesh).\n"
+            f"User Web Message: '{message}'.\n\n"
+            f"Your Persona & Strict Rules:\n"
+            f"1. Identity: You are Jubayer's sharp, loyal, respectful junior assistant and technical wingman (জুবায়ের ভাইয়ের চটপটে ছোট ভাই ও ডানহাত)। Address him respectfully as 'জুবায়ের ভাই' when needed, but never call yourself 'বড় ভাই'.\n"
+            f"2. Strict Conciseness: Jump STRAIGHT to the answer. NO filler words, NO unnecessary greetings like 'হ্যালো', 'কেমন আছেন' or fluff. Be 100% to-the-point.\n"
+            f"3. Default Length: Keep normal answers short, crisp, and direct (1-3 sentences). Break down further only if explicitly asked.\n"
+            f"4. Language: Natural Bengali, Banglish, or English as appropriate."
+        )
+        reply = await asyncio.to_thread(hermes_brain.chat, prompt, user_name="Jubayer")
+        return {"reply": reply, "status": "ok"}
+    except Exception as e:
+        return {"reply": f"হার্মিস এআই ব্রেইনে একটি নোটিশ এসেছে: {str(e)[:120]}", "status": "error"}
+
 @app.post("/api/scan")
 async def api_scan(limit: int = 2):
     jobs = await job_radar.scan_all_sources()
